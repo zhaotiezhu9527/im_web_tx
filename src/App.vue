@@ -1,27 +1,37 @@
 <template>
-  <div class="app">
-    <router-view />
-  </div>
+  <router-view />
 </template>
 
 <script setup></script>
 <style lang="scss">
 * {
-  padding: 0;
-  margin: 0;
-}
-body,
-html {
-  height: 100%;
-  width: 100%;
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    Segoe UI,
+    PingFang SC,
+    Hiragino Sans GB,
+    Microsoft YaHei,
+    Helvetica Neue,
+    Helvetica,
+    Arial,
+    sans-serif,
+    Apple Color Emoji,
+    Segoe UI Emoji,
+    Segoe UI Symbol;
 }
 .app {
   width: 1100px;
   height: 742px;
-  border: 1px solid #000;
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  background-color: #fff;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.3);
 }
 </style>

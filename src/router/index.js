@@ -1,20 +1,27 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import Cookies from 'js-cookie'
 
 const routes = [
   {
     path: '/',
+    name: 'index',
     component: () => import('@/views/index.vue')
+  },
+  {
+    path: '/password',
+    name: 'password',
+    component: () => import('@/views/password.vue')
+  },
+  {
+    path: '/login',
+    name: 'login',
+    component: () => import('@/views/login.vue')
+  },
+  {
+    path: '/register',
+    name: 'register',
+    component: () => import('@/views/register.vue')
   }
-  //   {
-  //     path: '/home',
-  //     name: 'home',
-  //     component: () => import('../views/home.vue')
-  //   },
-  //   {
-  //     path: '/login',
-  //     name: 'login',
-  //     component: () => import('../views/login.vue')
-  //   }
 ]
 
 const router = createRouter({
@@ -22,18 +29,14 @@ const router = createRouter({
   routes
 })
 
+const WHILE_LIST = ['/login', '/register']
 router.beforeEach((to, from, next) => {
-  next()
-  // 判断有没有登录
-  //   if (!localStorage.getItem('token')) {
-  //     if (to.name == 'login') {
-  //       next()
-  //     } else {
-  //       router.push('login')
-  //     }
-  //   } else {
-  //     next()
-  //   }
+  let token = Cookies.get('token')
+  if (!WHILE_LIST.includes(to.path) && !token) {
+    router.push('/login')
+  } else {
+    next()
+  }
 })
 
 export default router

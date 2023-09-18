@@ -4,12 +4,16 @@ import { defineStore } from 'pinia'
 export const useToken = defineStore('token', {
   state: () => {
     return {
-      token: ''
+      token: '',
+      usersig: ''
     }
   },
   actions: {
     setToken(data) {
       this.token = data
+    },
+    setUsersig(data) {
+      this.usersig = data
     }
   }
 })

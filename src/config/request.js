@@ -1,12 +1,11 @@
 import axios from 'axios'
 import Cookies from 'js-cookie'
 import { message } from 'ant-design-vue'
-// 创建并配置一个新的axios
-// process.env.VUE_APP_BASE_API
 const service = axios.create({
-  baseURL: 'http://im.juhai.xyz/',
+  baseURL: 'http://im.juhai.xyz/', //测试接口地址
   timeout: 60000, // 请求超时时间 毫秒
   headers: {
+    'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
     token: Cookies.get('token')
   }
 })
@@ -27,7 +26,9 @@ service.interceptors.request.use(
 service.interceptors.response.use(
   (response) => {
     const res = response.data
-    if (res.code == -1) {
+    if (res.code == -1 && res.msg === '用户不存在') {
+      return res
+    } else if (res.code == -1) {
       message.info(res.msg)
       return Promise.reject(res.msg)
     } else {
