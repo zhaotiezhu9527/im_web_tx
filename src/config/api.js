@@ -6,7 +6,7 @@ import request from './request'
  */
 async function get_login(params) {
   return request({
-    url: 'im-qtapi-test/user/login/V2',
+    url: '/user/login/V2',
     method: 'post',
     data: params
   })
@@ -18,7 +18,7 @@ async function get_login(params) {
  */
 async function get_register(params) {
   return request({
-    url: 'im-qtapi-test/user/register/v2',
+    url: '/user/register/v2',
     method: 'post',
     data: params
   })
@@ -30,7 +30,7 @@ async function get_register(params) {
  */
 async function get_logout(params) {
   return request({
-    url: 'im-qtapi-test/user/logout',
+    url: '/user/logout',
     method: 'post',
     data: params
   })
@@ -41,7 +41,7 @@ async function get_logout(params) {
  * @param {*} params
  */
 async function user_update_pwd(params) {
-  return request({ url: 'user/updatePwd', method: 'post', data: params })
+  return request({ url: '/user/updatePwd', method: 'post', data: params })
 }
 
 /**
@@ -50,7 +50,7 @@ async function user_update_pwd(params) {
  */
 async function user_checkSign(params) {
   return request({
-    url: 'im-qtapi-test/user/checkSign',
+    url: '/user/checkSign',
     method: 'get',
     data: params
   })
@@ -62,7 +62,7 @@ async function user_checkSign(params) {
  */
 async function system_config(params) {
   return request({
-    url: 'im-qtapi-test/system/config',
+    url: '/system/config',
     method: 'get',
     data: params
   })

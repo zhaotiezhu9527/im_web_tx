@@ -2,7 +2,7 @@ import axios from 'axios'
 import Cookies from 'js-cookie'
 import { message } from 'ant-design-vue'
 const service = axios.create({
-  baseURL: 'http://im.juhai.xyz/', //测试接口地址
+  baseURL: 'http://im.juhai.xyz/im-qtapi-test', //测试接口地址
   timeout: 60000, // 请求超时时间 毫秒
   headers: {
     'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
@@ -29,7 +29,7 @@ service.interceptors.response.use(
     if (res.code == -1 && res.msg === '用户不存在') {
       return res
     } else if (res.code == -1) {
-      message.info(res.msg)
+      message.error(res.msg)
       return Promise.reject(res.msg)
     } else {
       return res

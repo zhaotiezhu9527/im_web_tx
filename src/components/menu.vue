@@ -2,8 +2,8 @@
   <div class="menu">
     <div class="row">
       <i class="iconfont icon-icon-test3"></i>
-      <i class="iconfont icon-icon-test35"></i>
-      <i class="iconfont icon-icon-test37"></i>
+      <i class="iconfont icon-icon-test35" @click="router.push('/user')"></i>
+      <i class="iconfont icon-icon-test37" @click="router.push('/friend')"></i>
     </div>
     <a-tooltip placement="top" arrow-point-at-center color="#ffffff">
       <template #title>
@@ -70,6 +70,9 @@ function pass() {
     font-size: 13px;
     letter-spacing: 1px;
     cursor: pointer;
+    &:hover {
+      color: #0052d9 !important;
+    }
   }
 }
 </style>
