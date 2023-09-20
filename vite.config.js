@@ -8,6 +8,7 @@ import { presetUno, presetAttributify, presetIcons } from 'unocss'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  lintOnsave: false,
   plugins: [
     vue(),
     Unocss({

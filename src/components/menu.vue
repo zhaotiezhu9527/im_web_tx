@@ -1,9 +1,13 @@
 <template>
   <div class="menu">
     <div class="row">
-      <i class="iconfont icon-icon-test3"></i>
-      <i class="iconfont icon-icon-test35" @click="router.push('/user')"></i>
-      <i class="iconfont icon-icon-test37" @click="router.push('/friend')"></i>
+      <a-badge :count="items.message">
+        <i class="iconfont icon-icon-test3" @click="router.push('/')"></i>
+      </a-badge>
+      <i class="iconfont py-5 icon-icon-test35" @click="router.push('/user')"></i>
+      <a-badge count="0">
+        <i class="iconfont icon-icon-test37" @click="router.push('/friend')"></i>
+      </a-badge>
     </div>
     <a-tooltip placement="top" arrow-point-at-center color="#ffffff">
       <template #title>
@@ -19,7 +23,19 @@
 <script setup>
 import Cookies from 'js-cookie'
 import { useRouter } from 'vue-router'
+import { onMounted, ref } from 'vue'
+const items = ref({
+  message: '' //会话未读总数
+})
+onMounted(() => {
+  items.value.message = window.$chat.getTotalUnreadMessageCount()
 
+  // 监听会话未读总数
+  window.$chat.on(window.$tx.EVENT.TOTAL_UNREAD_MESSAGE_COUNT_UPDATED, ({ data }) => {
+    items.value.message = data
+  })
+  // 监听好友申请未读总数
+})
 const router = useRouter()
 function logout() {
   window.$api.get_logout().then(() => {
@@ -53,9 +69,6 @@ function pass() {
   .row {
     display: flex;
     flex-direction: column;
-    .iconfont {
-      margin-top: 20px;
-    }
   }
   .iconfont {
     font-size: 22px;

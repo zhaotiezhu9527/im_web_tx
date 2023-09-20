@@ -108,7 +108,7 @@ function sbumit() {
   flex: 1;
   height: 100%;
   .login-box {
-    padding-top: 100px;
+    padding-top: 60px;
   }
 }
 </style>

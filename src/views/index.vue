@@ -6,7 +6,11 @@
         <TUIConversation @current="handleCurrentConversation" />
       </div>
       <div class="chat">
-        <TUIChat> 123</TUIChat>
+        <TUIChat>
+          <div class="content flex justify-center items-center">
+            <i class="iconfont icon-icon-test3"></i>
+          </div>
+        </TUIChat>
       </div>
     </div>
   </div>
@@ -41,5 +45,13 @@ const handleCurrentConversation = (value) => {
   flex: 1;
   height: 100%;
   position: relative;
+  .content {
+    width: 760px;
+    height: 100%;
+    .iconfont {
+      font-size: 200px;
+      color: #eee;
+    }
+  }
 }
 </style>

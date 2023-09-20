@@ -12,7 +12,12 @@
           />
           <div class="icon ml-2" @click="router.push('/friend')">取消</div>
         </div>
-        <div v-for="(item, index) in list" :key="index" class="flex items-center item">
+        <div
+          v-for="(item, index) in list"
+          :key="index"
+          class="flex items-center item"
+          @click="routePage(item)"
+        >
           <a-avatar shape="square" :src="item.avatar" :size="40" />
           <div class="pl-2 text-14px">{{ item.nick }}</div>
         </div>
@@ -65,6 +70,9 @@ function dataFn() {
       window.$message.error(imError.message)
     })
 }
+function routePage(vim) {
+  infoRef.value.open(vim)
+}
 </script>
 <style lang="scss" scoped>
 .home-TUIKit-main {
@@ -78,9 +86,13 @@ function dataFn() {
   border-right: 1px solid #f4f5f9;
 }
 .chat {
-  flex: 1;
   height: 100%;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 760px;
 }
 .icon {
   cursor: pointer;
