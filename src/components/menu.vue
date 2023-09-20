@@ -5,7 +5,7 @@
         <i class="iconfont icon-icon-test3" @click="router.push('/')"></i>
       </a-badge>
       <i class="iconfont py-5 icon-icon-test35" @click="router.push('/user')"></i>
-      <a-badge count="0">
+      <a-badge :count="items.count">
         <i class="iconfont icon-icon-test37" @click="router.push('/friend')"></i>
       </a-badge>
     </div>
@@ -25,16 +25,21 @@ import Cookies from 'js-cookie'
 import { useRouter } from 'vue-router'
 import { onMounted, ref } from 'vue'
 const items = ref({
-  message: '' //会话未读总数
+  message: 0, //会话未读总数
+  count: 0 // 好友申请未读数量
 })
 onMounted(() => {
   items.value.message = window.$chat.getTotalUnreadMessageCount()
-
   // 监听会话未读总数
   window.$chat.on(window.$tx.EVENT.TOTAL_UNREAD_MESSAGE_COUNT_UPDATED, ({ data }) => {
     items.value.message = data
   })
   // 监听好友申请未读总数
+  window.$chat.on(window.$tx.EVENT.FRIEND_APPLICATION_LIST_UPDATED, (event) => {
+    // unreadCount - 好友申请的未读数
+    const { unreadCount } = event.data
+    items.value.count = unreadCount
+  })
 })
 const router = useRouter()
 function logout() {

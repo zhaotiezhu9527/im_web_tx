@@ -5,21 +5,9 @@
       <div class="conversation">
         <div class="search flex items-center justify-between p-2">
           <a-input class="input" @pressEnter="change" v-model:value="search" placeholder="搜索" />
-          <div class="icon ml-2 text-5" @click="router.push('/add')">+</div>
-        </div>
-        <div class="flex items-center item" @click="router.push('/newfriend')">
-          <a-badge :count="count">
-            <div class="font-icon">
-              <i class="iconfont icon-tianjiahaoyou text-30px"></i>
-            </div>
-          </a-badge>
-          <div class="pl-2 text-14px">新的朋友</div>
-        </div>
-        <div class="flex items-center item" @click="router.push('/black?type=black')">
-          <div class="font-icon">
-            <i class="iconfont icon-jurassic_user text-20px"></i>
+          <div class="icon ml-2 text-5" @click="router.push('/friend')">
+            <i class="iconfont icon-icon-test59"></i>
           </div>
-          <div class="pl-2 text-14px">黑名单</div>
         </div>
         <div
           v-for="(item, index) in list"
@@ -27,8 +15,8 @@
           class="flex items-center item"
           @click="routePage(item)"
         >
-          <a-avatar shape="square" :src="item.profile?.avatar" :size="40" />
-          <div class="pl-2 text-14px">{{ item.remark || item.profile.nick }}</div>
+          <a-avatar shape="square" :src="item.avatar" :size="40" />
+          <div class="pl-2 text-14px">{{ item.nick }}</div>
         </div>
         <a-empty description="暂无数据" :image="simpleImage" class="pt-10" v-if="!list.length">
         </a-empty>
@@ -48,26 +36,14 @@ import { Empty } from 'ant-design-vue'
 import infoscn from '@/components/infos.vue'
 const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE
 const router = useRouter()
-const count = ref(0)
 onMounted(() => {
   dataFn()
-
-  //好友或者自己的资料更新
-  window.$chat.on(window.$tx.EVENT.PROFILE_UPDATED, () => dataFn())
-  // 好友列表更新
-  window.$chat.on(window.$tx.EVENT.FRIEND_LIST_UPDATED, () => dataFn())
-  // 好友申请触发
-  window.$chat.on(window.$tx.EVENT.FRIEND_APPLICATION_LIST_UPDATED, (event) => {
-    // unreadCount - 好友申请的未读数
-    const { unreadCount } = event.data
-    count.value = unreadCount
-  })
 })
 // 获取好友列表
 const list = ref([])
 const search = ref('')
 function dataFn() {
-  window.$chat.getFriendList().then(({ data }) => {
+  window.$chat.getBlacklist().then(({ data }) => {
     list.value = data
   })
 }
@@ -106,6 +82,7 @@ function routePage(vim) {
   width: 28px;
   display: flex;
   justify-content: center;
+  align-items: center;
   color: #666;
   user-select: none;
 }

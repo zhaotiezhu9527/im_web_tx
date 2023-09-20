@@ -43,6 +43,16 @@ const routes = [
     path: '/add',
     name: 'add',
     component: () => import('@/views/add.vue')
+  },
+  {
+    path: '/newfriend',
+    name: 'newfriend',
+    component: () => import('@/views/newfriend.vue')
+  },
+  {
+    path: '/black',
+    name: 'black',
+    component: () => import('@/views/black.vue')
   }
 ]
 

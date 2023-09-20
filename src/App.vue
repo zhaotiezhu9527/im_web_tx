@@ -36,4 +36,9 @@
   background-color: #fff;
   box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.3);
 }
+.ant-select-selector,
+.ant-input-password,
+.ant-input {
+  border-radius: 4px !important;
+}
 </style>

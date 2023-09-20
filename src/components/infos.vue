@@ -104,6 +104,7 @@ const form = ref({
 })
 function open(val) {
   items.value = val
+  dataFn()
   friendFn(val.userID)
   checkFriendFn()
   // 好友的资料更新
@@ -154,7 +155,6 @@ function friendFn(id) {
     .then(({ data }) => {
       if (data.friendList.length) {
         infos.value = data.friendList[0]
-        console.log(infos.value)
         form.value.remark = infos.value.remark
       }
     })
@@ -175,7 +175,6 @@ function checkFriendFn() {
       successUserIDList.forEach((item) => {
         const { relation } = item
         form.value.relation = relation
-        console.log('relation', relation)
         // - relation: TencentCloudChat.TYPES.SNS_TYPE_NO_RELATION A 的好友表中没有 B，但无法确定 B 的好友表中是否有 A
         // - relation: TencentCloudChat.TYPES.SNS_TYPE_A_WITH_B A 的好友表中有 B，但无法确定 B 的好友表中是否有 A
         form.value.black = relation === window.$tx.TYPES.SNS_TYPE_NO_RELATION
@@ -271,7 +270,7 @@ function service() {
       router.push('/')
     })
     .catch((err) => {
-      console.warn('打开会话失败', err, err)
+      window.$message.error(err.message)
     })
 }
 // 加入移除黑名单
@@ -291,9 +290,7 @@ function blackChange() {
                 clearHistoryMessage: false
               })
               .then(() => {})
-              .catch((err) => {
-                console.log(err)
-              })
+              .catch(() => {})
           }
         })
       })
