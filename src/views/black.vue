@@ -13,7 +13,8 @@
           v-for="(item, index) in list"
           :key="index"
           class="flex items-center item"
-          @click="routePage(item)"
+          :class="{ active: active === index }"
+          @click="routePage(item, index)"
         >
           <a-avatar shape="square" :src="item.avatar" :size="40" />
           <div class="pl-2 text-14px">{{ item.nick }}</div>
@@ -23,6 +24,7 @@
       </div>
       <div class="chat">
         <infoscn ref="infoRef" />
+        <i class="iconfont icon-icon-test37" v-if="!infos"></i>
       </div>
     </div>
   </div>
@@ -38,19 +40,35 @@ const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE
 const router = useRouter()
 onMounted(() => {
   dataFn()
+  // 黑名单列表更新
+  window.$chat.on(window.$tx.EVENT.BLACKLIST_UPDATED, () => dataFn())
 })
-// 获取好友列表
+// 获取黑名单列表
 const list = ref([])
 const search = ref('')
 function dataFn() {
   window.$chat.getBlacklist().then(({ data }) => {
-    list.value = data
+    if (data.length) {
+      window.$chat
+        .getUserProfile({
+          userIDList: data
+        })
+        .then((imResponse) => {
+          list.value = imResponse.data
+        })
+    } else {
+      list.value = []
+    }
   })
 }
 
 function change() {}
 const infoRef = ref({})
-function routePage(vim) {
+const infos = ref('')
+const active = ref(null)
+function routePage(vim, index) {
+  active.value = index
+  infos.value = vim
   infoRef.value.open(vim)
 }
 </script>
@@ -64,6 +82,8 @@ function routePage(vim) {
   flex: 0 0 24%;
   height: 100%;
   border-right: 1px solid #f4f5f9;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 .chat {
   height: 100%;
@@ -73,6 +93,10 @@ function routePage(vim) {
   justify-content: center;
   align-items: center;
   width: 760px;
+  .iconfont {
+    font-size: 200px;
+    color: #eee;
+  }
 }
 .icon {
   background-color: #ebebeb;
@@ -97,6 +121,7 @@ function routePage(vim) {
   width: 100%;
   padding: 6px 10px;
   cursor: pointer;
+  &.active,
   &:hover {
     background-color: #ebebeb;
   }

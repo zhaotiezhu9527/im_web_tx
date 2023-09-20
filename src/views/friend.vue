@@ -25,7 +25,8 @@
           v-for="(item, index) in list"
           :key="index"
           class="flex items-center item"
-          @click="routePage(item)"
+          :class="{ active: active === index }"
+          @click="routePage(item, index)"
         >
           <a-avatar shape="square" :src="item.profile?.avatar" :size="40" />
           <div class="pl-2 text-14px">{{ item.remark || item.profile.nick }}</div>
@@ -35,6 +36,7 @@
       </div>
       <div class="chat">
         <infoscn ref="infoRef" />
+        <i class="iconfont icon-icon-test37" v-if="!infos"></i>
       </div>
     </div>
   </div>
@@ -49,9 +51,9 @@ import infoscn from '@/components/infos.vue'
 const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE
 const router = useRouter()
 const count = ref(0)
-onMounted(() => {
-  dataFn()
 
+dataFn()
+onMounted(() => {
   //好友或者自己的资料更新
   window.$chat.on(window.$tx.EVENT.PROFILE_UPDATED, () => dataFn())
   // 好友列表更新
@@ -74,7 +76,11 @@ function dataFn() {
 
 function change() {}
 const infoRef = ref({})
-function routePage(vim) {
+const infos = ref('')
+const active = ref(null)
+function routePage(vim, index) {
+  active.value = index
+  infos.value = vim
   infoRef.value.open(vim)
 }
 </script>
@@ -87,6 +93,8 @@ function routePage(vim) {
   min-width: 285px;
   flex: 0 0 24%;
   height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
   border-right: 1px solid #f4f5f9;
 }
 .chat {
@@ -97,6 +105,10 @@ function routePage(vim) {
   justify-content: center;
   align-items: center;
   width: 760px;
+  .iconfont {
+    font-size: 200px;
+    color: #eee;
+  }
 }
 .icon {
   background-color: #ebebeb;
@@ -120,6 +132,7 @@ function routePage(vim) {
   width: 100%;
   padding: 6px 10px;
   cursor: pointer;
+  &.active,
   &:hover {
     background-color: #ebebeb;
   }

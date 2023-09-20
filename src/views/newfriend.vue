@@ -13,7 +13,8 @@
           v-for="(item, index) in list"
           :key="index"
           class="flex items-center item"
-          @click="routePage(item)"
+          :class="{ active: active === index }"
+          @click="routePage(item, index)"
         >
           <a-avatar shape="square" :src="item.avatar" :size="40" />
           <div class="pl-2 text-14px">{{ item.nick }}</div>
@@ -22,7 +23,8 @@
         </a-empty>
       </div>
       <div class="chat">
-        <infoscn ref="infoRef" />
+        <detail ref="detailRef" @ok="infos = ''" />
+        <i class="iconfont icon-icon-test37" v-if="!infos"></i>
       </div>
     </div>
   </div>
@@ -33,12 +35,13 @@ import Menu from '@/components/menu.vue'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { Empty } from 'ant-design-vue'
-import infoscn from '@/components/infos.vue'
+import detail from '@/components/detail.vue'
 const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE
 const router = useRouter()
 // 获取好友列表
 const list = ref([])
 const search = ref('')
+const infos = ref('')
 
 onMounted(() => {
   dataFn()
@@ -51,14 +54,17 @@ onMounted(() => {
 
 function dataFn() {
   window.$chat.getFriendApplicationList().then(({ data }) => {
-    list.value = data
+    list.value = data.friendApplicationList
   })
 }
-
+// 搜索
 function change() {}
-const infoRef = ref({})
-function routePage(vim) {
-  infoRef.value.open(vim)
+const detailRef = ref({})
+const active = ref(null)
+function routePage(vim, index) {
+  active.value = index
+  infos.value = vim
+  detailRef.value.open(vim)
 }
 </script>
 <style lang="scss" scoped>
@@ -71,6 +77,8 @@ function routePage(vim) {
   flex: 0 0 24%;
   height: 100%;
   border-right: 1px solid #f4f5f9;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 .chat {
   height: 100%;
@@ -80,6 +88,10 @@ function routePage(vim) {
   justify-content: center;
   align-items: center;
   width: 760px;
+  .iconfont {
+    font-size: 200px;
+    color: #eee;
+  }
 }
 .icon {
   background-color: #ebebeb;
@@ -104,9 +116,11 @@ function routePage(vim) {
   width: 100%;
   padding: 6px 10px;
   cursor: pointer;
+  &.active,
   &:hover {
     background-color: #ebebeb;
   }
+
   &:nth-child(2) {
     .font-icon {
       background-color: #fa9d3b;
