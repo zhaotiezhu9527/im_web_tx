@@ -9,7 +9,7 @@
         isH5
           ? {
               maxWidth: data.width ? data.width + 'px' : 'calc(100vw - 180px)',
-              maxHeight: data.height ? data.height + 'px' : 'calc(100vw - 180px)',
+              maxHeight: data.height ? data.height + 'px' : 'calc(100vw - 180px)'
             }
           : {}
       "
@@ -41,90 +41,90 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, watchEffect, reactive, toRefs, computed, ref, nextTick } from 'vue';
-import { handleSkeletonSize } from '../utils/utils';
+import { defineComponent, watchEffect, reactive, toRefs, computed, ref, nextTick } from 'vue'
+import { handleSkeletonSize } from '../utils/utils'
 export default defineComponent({
   props: {
     data: {
       type: Object,
-      default: () => ({}),
+      default: () => ({})
     },
     isH5: {
       type: Boolean,
-      default: false,
-    },
+      default: false
+    }
   },
   emits: ['uploading', 'previewImage'],
   setup(props: any, ctx: any) {
     const data = reactive({
       data: {
-        progress: 0,
+        progress: 0
       },
-      show: false,
-    });
+      show: false
+    })
 
-    const skeleton: any = ref();
+    const skeleton: any = ref()
 
     const isWidth = computed(() => {
-      const { width = 0, height = 0 } = (data.data as any)?.message?.payload?.imageInfoArray[0];
-      return width >= height;
-    });
+      const { width = 0, height = 0 } = (data.data as any)?.message?.payload?.imageInfoArray[0]
+      return width >= height
+    })
 
     watchEffect(() => {
-      data.data = props.data;
-      if (!data.data) return;
+      data.data = props.data
+      if (!data.data) return
       nextTick(() => {
         if (!data.data.progress) {
-          const { width = 0, height = 0 } = data.data as any;
-          if (width === 0 || height === 0) return;
-          const containerWidth = document.getElementById('app')?.clientWidth || 0;
-          const max = props.isH5 ? Math.min(containerWidth - 180, 300) : 300;
-          const size = handleSkeletonSize(width, height, max, max);
-          skeleton?.value?.style && (skeleton.value.style.width = `${size.width}px`);
-          skeleton?.value?.style && (skeleton.value.style.height = `${size.height}px`);
+          const { width = 0, height = 0 } = data.data as any
+          if (width === 0 || height === 0) return
+          const containerWidth = document.getElementById('app')?.clientWidth || 0
+          const max = props.isH5 ? Math.min(containerWidth - 180, 300) : 300
+          const size = handleSkeletonSize(width, height, max, max)
+          skeleton?.value?.style && (skeleton.value.style.width = `${size.width}px`)
+          skeleton?.value?.style && (skeleton.value.style.height = `${size.height}px`)
         } else {
-          ctx.emit('uploading');
+          ctx.emit('uploading')
         }
-      });
-    });
+      })
+    })
 
     const toggleShow = () => {
       if (!data.data.progress) {
-        ctx.emit('previewImage', (data.data as any).message);
+        ctx.emit('previewImage', (data.data as any).message)
       }
-    };
+    }
     const downloadImage = (message: any) => {
-      const targetImage = document.createElement('a');
-      const downloadImageName = message.payload.imageInfoArray[0].instanceID;
-      targetImage.setAttribute('download', downloadImageName);
-      const image = new Image();
-      image.src = message.payload.imageInfoArray[0].url;
-      image.setAttribute('crossOrigin', 'Anonymous');
+      const targetImage = document.createElement('a')
+      const downloadImageName = message.payload.imageInfoArray[0].instanceID
+      targetImage.setAttribute('download', downloadImageName)
+      const image = new Image()
+      image.src = message.payload.imageInfoArray[0].url
+      image.setAttribute('crossOrigin', 'Anonymous')
       image.onload = () => {
-        targetImage.href = getImageDataURL(image);
-        targetImage.click();
-      };
-    };
+        targetImage.href = getImageDataURL(image)
+        targetImage.click()
+      }
+    }
 
     const getImageDataURL = (image: any) => {
-      const canvas = document.createElement('canvas');
-      canvas.width = image.width;
-      canvas.height = image.height;
-      const ctx = canvas.getContext('2d');
-      ctx?.drawImage(image, 0, 0, image.width, image.height);
-      const extension = image.src.substring(image.src.lastIndexOf('.') + 1).toLowerCase();
-      return canvas.toDataURL(`image/${extension}`, 1);
-    };
+      const canvas = document.createElement('canvas')
+      canvas.width = image.width
+      canvas.height = image.height
+      const ctx = canvas.getContext('2d')
+      ctx?.drawImage(image, 0, 0, image.width, image.height)
+      const extension = image.src.substring(image.src.lastIndexOf('.') + 1).toLowerCase()
+      return canvas.toDataURL(`image/${extension}`, 1)
+    }
 
     return {
       ...toRefs(data),
       toggleShow,
       skeleton,
       isWidth,
-      downloadImage,
-    };
-  },
-});
+      downloadImage
+    }
+  }
+})
 </script>
 <style lang="scss" scoped>
 @import url('../../../styles/common.scss');
@@ -176,8 +176,8 @@ export default defineComponent({
 .dialog {
   position: fixed;
   z-index: 12;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
   background: rgba(#000000, 0.3);
   top: 0;
   left: 0;

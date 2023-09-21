@@ -2,7 +2,9 @@
   <div class="message-video">
     <div
       class="message-video-box"
-      :class="[!data.progress && data.message.status === 'success' && isH5 && 'message-video-cover']"
+      :class="[
+        !data.progress && data.message.status === 'success' && isH5 && 'message-video-cover'
+      ]"
       @click="toggleShow"
       ref="skeleton"
     >
@@ -38,27 +40,36 @@
       <header>
         <i class="icon icon-close" @click.stop="toggleShow"></i>
       </header>
-      <div class="dialog-video-box" :class="[isH5 ? 'dialog-video-h5' : '']" @click.self="toggleShow">
-        <video :class="[isWidth ? 'isWidth' : 'isHeight']" :src="data.url" controls autoplay></video>
+      <div
+        class="dialog-video-box"
+        :class="[isH5 ? 'dialog-video-h5' : '']"
+        @click.self="toggleShow"
+      >
+        <video
+          :class="[isWidth ? 'isWidth' : 'isHeight']"
+          :src="data.url"
+          controls
+          autoplay
+        ></video>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, watchEffect, reactive, toRefs, computed, nextTick, ref, watch } from 'vue';
-import { handleSkeletonSize } from '../utils/utils';
+import { defineComponent, watchEffect, reactive, toRefs, computed, nextTick, ref, watch } from 'vue'
+import { handleSkeletonSize } from '../utils/utils'
 
 export default defineComponent({
   props: {
     data: {
       type: Object,
-      default: () => ({}),
+      default: () => ({})
     },
     isH5: {
       type: Boolean,
-      default: false,
-    },
+      default: false
+    }
   },
   setup(props: any, ctx: any) {
     const data = reactive({
@@ -66,99 +77,101 @@ export default defineComponent({
       show: false,
       poster: '',
       posterWidth: 0,
-      posterHeight: 0,
-    });
-    const skeleton = ref();
-    const video = ref();
+      posterHeight: 0
+    })
+    const skeleton = ref()
+    const video = ref()
     const isWidth = computed(() => {
-      const { snapshotWidth = 0, snapshotHeight = 0 } = (data.data as any)?.message?.payload;
-      return snapshotWidth >= snapshotHeight;
-    });
-    const transparentPosterUrl = 'https://web.sdk.qcloud.com/im/assets/images/transparent.png';
+      const { snapshotWidth = 0, snapshotHeight = 0 } = (data.data as any)?.message?.payload
+      return snapshotWidth >= snapshotHeight
+    })
+    const transparentPosterUrl = 'https://web.sdk.qcloud.com/im/assets/images/transparent.png'
 
     const toggleShow = () => {
       if (!(data.data as any).progress) {
-        data.show = !data.show;
+        data.show = !data.show
       }
-    };
+    }
 
     // h5 部分浏览器（safari / wx）video标签 封面为空 在视频未上传完成前的封面展示需要单独进行处理截取
     const getVideoBase64 = (url: string) => {
       return new Promise(function (resolve, reject) {
-        let dataURL = '';
-        let video = document.createElement('video');
-        video.setAttribute('crossOrigin', 'anonymous'); //处理跨域
-        video.setAttribute('src', url);
-        video.setAttribute('preload', 'auto');
+        let dataURL = ''
+        let video = document.createElement('video')
+        video.setAttribute('crossOrigin', 'anonymous') //处理跨域
+        video.setAttribute('src', url)
+        video.setAttribute('preload', 'auto')
         video.addEventListener(
           'loadeddata',
           function () {
             let canvas = document.createElement('canvas'),
               width = video.videoWidth, //canvas的尺寸和图片一样
-              height = video.videoHeight;
-            canvas.width = width;
-            canvas.height = height;
-            (canvas as any).getContext('2d').drawImage(video, 0, 0, width, height); //绘制canvas
-            dataURL = canvas.toDataURL('image/jpeg'); //转换为base64
-            data.posterWidth = width;
-            data.posterHeight = height;
-            resolve(dataURL);
+              height = video.videoHeight
+            canvas.width = width
+            canvas.height = height
+            ;(canvas as any).getContext('2d').drawImage(video, 0, 0, width, height) //绘制canvas
+            dataURL = canvas.toDataURL('image/jpeg') //转换为base64
+            data.posterWidth = width
+            data.posterHeight = height
+            resolve(dataURL)
           },
           { once: true }
-        );
-      });
-    };
+        )
+      })
+    }
 
     const handlePosterUrl = async (data: any) => {
-      if (!data) return '';
+      if (!data) return ''
       if (data.progress) {
-        return await getVideoBase64(data.url);
+        return await getVideoBase64(data.url)
       } else {
         return (
           (data.snapshotUrl !== transparentPosterUrl && data.snapshotUrl) ||
-          (data?.message?.payload?.snapshotUrl !== transparentPosterUrl && data?.message?.payload?.snapshotUrl) ||
-          (data?.message?.payload?.thumbUrl !== transparentPosterUrl && data?.message?.payload?.thumbUrl) ||
+          (data?.message?.payload?.snapshotUrl !== transparentPosterUrl &&
+            data?.message?.payload?.snapshotUrl) ||
+          (data?.message?.payload?.thumbUrl !== transparentPosterUrl &&
+            data?.message?.payload?.thumbUrl) ||
           (await getVideoBase64(data.url))
-        );
+        )
       }
-    };
+    }
 
     watchEffect(async () => {
-      data.data = props.data;
-      if (!data.data) return;
-      data.poster = await handlePosterUrl(data.data);
+      data.data = props.data
+      if (!data.data) return
+      data.poster = await handlePosterUrl(data.data)
       nextTick(async () => {
-        const containerWidth = document.getElementById('messageEle')?.clientWidth || 0;
-        const max = props.isH5 ? Math.min(containerWidth - 172, 300) : 300;
-        let size;
+        const containerWidth = document.getElementById('messageEle')?.clientWidth || 0
+        const max = props.isH5 ? Math.min(containerWidth - 172, 300) : 300
+        let size
         if (!(data.data as any).progress) {
-          let { snapshotWidth = 0, snapshotHeight = 0, snapshotUrl } = data.data as any;
-          if (snapshotWidth === 0 || snapshotHeight === 0) return;
+          let { snapshotWidth = 0, snapshotHeight = 0, snapshotUrl } = data.data as any
+          if (snapshotWidth === 0 || snapshotHeight === 0) return
           if (snapshotUrl === transparentPosterUrl) {
-            snapshotWidth = data.posterWidth;
-            snapshotHeight = data.posterHeight;
+            snapshotWidth = data.posterWidth
+            snapshotHeight = data.posterHeight
           }
-          size = handleSkeletonSize(snapshotWidth, snapshotHeight, max, max);
-          skeleton?.value?.style && (skeleton.value.style.width = `${size.width}px`);
-          skeleton?.value?.style && (skeleton.value.style.height = `${size.height}px`);
+          size = handleSkeletonSize(snapshotWidth, snapshotHeight, max, max)
+          skeleton?.value?.style && (skeleton.value.style.width = `${size.width}px`)
+          skeleton?.value?.style && (skeleton.value.style.height = `${size.height}px`)
           if (!props.isH5) {
-            video?.value?.style && (video.value.style.width = `${size.width}px`);
-            video?.value?.style && (video.value.style.height = `${size.height}px`);
+            video?.value?.style && (video.value.style.width = `${size.width}px`)
+            video?.value?.style && (video.value.style.height = `${size.height}px`)
           }
         } else {
-          ctx.emit('uploading');
+          ctx.emit('uploading')
         }
-      });
-    });
+      })
+    })
 
     watch(
       () => (data.data as any)?.progress,
       (newVal, oldVal) => {
         if (!newVal && oldVal) {
-          ctx.emit('uploading');
+          ctx.emit('uploading')
         }
       }
-    );
+    )
 
     return {
       ...toRefs(data),
@@ -167,10 +180,10 @@ export default defineComponent({
       getVideoBase64,
       handlePosterUrl,
       skeleton,
-      video,
-    };
-  },
-});
+      video
+    }
+  }
+})
 </script>
 <style lang="scss" scoped>
 @import url('../../../styles/common.scss');
@@ -266,8 +279,8 @@ export default defineComponent({
 .dialog-video {
   position: fixed;
   z-index: 12;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
   top: 0;
   left: 0;
   display: flex;

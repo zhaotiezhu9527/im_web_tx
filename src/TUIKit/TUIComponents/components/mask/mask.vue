@@ -5,35 +5,35 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, watchEffect, toRefs } from 'vue';
+import { defineComponent, reactive, watchEffect, toRefs } from 'vue'
 
 export default defineComponent({
   props: {
     show: {
       type: Boolean,
-      default: () => false,
-    },
+      default: () => false
+    }
   },
-  setup(props:any, ctx:any) {
+  setup(props: any, ctx: any) {
     const data = reactive({
-      show: false,
-    });
+      show: false
+    })
 
     watchEffect(() => {
-      data.show = props.show;
-    });
+      data.show = props.show
+    })
 
     const toggleView = () => {
-      data.show = !data.show;
-      ctx.emit('update:show', data.show);
-    };
+      data.show = !data.show
+      ctx.emit('update:show', data.show)
+    }
 
     return {
       ...toRefs(data),
-      toggleView,
-    };
-  },
-});
+      toggleView
+    }
+  }
+})
 </script>
 
 <style lang="scss" scoped>
@@ -41,8 +41,8 @@ export default defineComponent({
 @import url('../../styles/icon.scss');
 .mask {
   position: fixed;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
   left: 0;
   top: 0;
   z-index: 99;

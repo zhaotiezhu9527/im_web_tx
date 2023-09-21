@@ -1,27 +1,30 @@
 <template>
   <div class="custom">
     <i class="icon icon-custom" @click="toggleShow"></i>
-    <main class="custom-main"  v-if="show">
+    <main class="custom-main" v-if="show">
       <ul class="custom-list">
-        <li  class="custom-list-item">
+        <li class="custom-list-item">
           <label>data</label>
-          <input type="text" v-model="custom.data">
+          <input type="text" v-model="custom.data" />
         </li>
-        <li  class="custom-list-item">
+        <li class="custom-list-item">
           <label>description</label>
-          <input type="text" v-model="custom.description">
+          <input type="text" v-model="custom.description" />
         </li>
-        <li  class="custom-list-item">
+        <li class="custom-list-item">
           <label>extension</label>
-          <input type="text" v-model="custom.extension">
+          <input type="text" v-model="custom.extension" />
         </li>
       </ul>
       <ul class="custom-footer">
-        <button class="btn btn-cancel" @click="cancel">{{$t('取消')}}</button>
+        <button class="btn btn-cancel" @click="cancel">{{ $t('取消') }}</button>
         <button
           class="btn btn-default"
           :disabled="!custom.data && !custom.description && custom.extension"
-          @click="submit">{{$t('发送')}}</button>
+          @click="submit"
+        >
+          {{ $t('发送') }}
+        </button>
       </ul>
     </main>
     <div v-if="show" class="mask" @click.self="toggleShow"></div>
@@ -29,60 +32,59 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, watchEffect, toRefs } from 'vue';
+import { defineComponent, reactive, watchEffect, toRefs } from 'vue'
 
 const Custom = defineComponent({
   props: {
     show: {
       type: Boolean,
-      default: () => false,
-    },
+      default: () => false
+    }
   },
-  setup(props:any, ctx:any) {
+  setup(props: any, ctx: any) {
     const data = reactive({
       show: false,
       custom: {
         data: '',
         description: '',
-        extension: '',
+        extension: ''
       },
-      TUIServer: null,
-    });
+      TUIServer: null
+    })
 
-    data.TUIServer = Custom.TUIServer;
+    data.TUIServer = Custom.TUIServer
 
     watchEffect(() => {
-      data.show = props.show;
-    });
+      data.show = props.show
+    })
 
     const toggleShow = () => {
-      data.show = !data.show;
-    };
+      data.show = !data.show
+    }
 
     const cancel = () => {
       data.custom = {
         data: '',
         description: '',
-        extension: '',
-      };
-      toggleShow();
-    };
+        extension: ''
+      }
+      toggleShow()
+    }
 
     const submit = () => {
-      Custom.TUIServer.sendCustomMessage(data.custom);
-      cancel();
-    };
-
+      Custom.TUIServer.sendCustomMessage(data.custom)
+      cancel()
+    }
 
     return {
       ...toRefs(data),
       toggleShow,
       cancel,
-      submit,
-    };
-  },
-});
-export default Custom;
+      submit
+    }
+  }
+})
+export default Custom
 </script>
 
 <style lang="scss" scoped>
@@ -97,7 +99,7 @@ export default Custom;
     width: 315px;
     background: #ffffff;
     top: -180px;
-    box-shadow: 0 2px 12px 0 rgba(0,0,0, .1);
+    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
     padding: 10px;
     display: flex;
     flex-direction: column;
@@ -135,7 +137,7 @@ export default Custom;
   border: none;
   font-weight: 400;
   font-size: 14px;
-  color: #FFFFFF;
+  color: #ffffff;
   letter-spacing: 0;
   text-align: center;
   line-height: 20px;
@@ -144,8 +146,8 @@ export default Custom;
     color: #666666;
   }
   &-default {
-    background: #006EFF;
-    border: 1px solid #006EFF;
+    background: #006eff;
+    border: 1px solid #006eff;
   }
   &:disabled {
     opacity: 0.3;
@@ -153,8 +155,8 @@ export default Custom;
 }
 .mask {
   position: fixed;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
   top: 0;
   left: 0;
   opacity: 0;
