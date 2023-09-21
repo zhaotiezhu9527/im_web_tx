@@ -228,7 +228,7 @@ export default defineComponent({
   padding: 12px;
 }
 .conversation {
-  min-width: 285px;
+  width: 285px;
   flex: 0 0 24%;
   border-right: 1px solid #f4f5f9;
 }

@@ -1,6 +1,12 @@
 <template>
-  <div :class="['message-input-button', isH5 && 'message-input-button-h5']">
-    <button v-if="enableSend" class="message-input-button-cont" data-type="text" @click="sendMessage" :disabled="false">
+  <div class="message-input-button">
+    <button
+      v-if="enableSend"
+      class="message-input-button-cont"
+      data-type="text"
+      @click="sendMessage"
+      :disabled="false"
+    >
       <p class="message-input-button-hover">
         {{ $t('TUIChat.按Enter发送，Ctrl+Enter换行') }}
       </p>
@@ -9,25 +15,25 @@
   </div>
 </template>
 <script setup lang="ts">
-import { defineProps, toRefs, defineEmits, ref } from 'vue';
+import { defineProps, toRefs, defineEmits, ref } from 'vue'
 const props = defineProps({
   enableSend: {
     type: Boolean,
-    default: true,
+    default: true
   },
   messages: {
     type: Array,
-    default: () => [],
+    default: () => []
   },
   isH5: {
     type: Boolean,
-    default: true,
-  },
-});
-const { enableSend } = toRefs(props);
-const emits = defineEmits(['sendMessage']);
+    default: true
+  }
+})
+const { enableSend } = toRefs(props)
+const emits = defineEmits(['sendMessage'])
 const sendMessage = () => {
-  emits('sendMessage');
+  emits('sendMessage')
 }
 </script>
 <style scoped lang="scss">
@@ -37,7 +43,7 @@ const sendMessage = () => {
   position: absolute;
   bottom: 20px;
   right: 20px;
-  &-h5{
+  &-h5 {
     position: static;
   }
   &-cont {

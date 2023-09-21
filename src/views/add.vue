@@ -80,7 +80,7 @@ function routePage(vim) {
   height: 100%;
 }
 .conversation {
-  min-width: 285px;
+  width: 285px;
   flex: 0 0 24%;
   height: 100%;
   border-right: 1px solid #f4f5f9;

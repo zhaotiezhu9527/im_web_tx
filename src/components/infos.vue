@@ -260,18 +260,7 @@ function deleteFn() {
 }
 // 聊天
 function service() {
-  window.$chat
-    .getConversationProfile(`C2C${items.value.userID}`)
-    .then(({ data }) => {
-      console.log(data)
-      // window.$chat.switchConversation(data.conversation.conversationID).catch(() => {
-      //   this.$base.show('进入回话失败')
-      // })
-      router.push('/')
-    })
-    .catch((err) => {
-      window.$message.error(err.message)
-    })
+  router.push(`/?c=C2C${items.value.userID}`)
 }
 // 加入移除黑名单
 function blackChange() {
