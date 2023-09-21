@@ -263,7 +263,7 @@ function deleteFn() {
 }
 // 聊天
 function service() {
-  router.push(`/?c=C2C${items.value.userID}`)
+  router.push(`/?c=${items.value.userID}`)
 }
 // 加入移除黑名单
 function blackChange() {

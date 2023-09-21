@@ -31,39 +31,39 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, reactive, watchEffect, toRefs, watch, ref } from 'vue';
-import { onClickOutside } from '@vueuse/core';
-import { caculateTimeago } from '../../../utils';
-import { Message } from '../../interface';
-import TIM from '../../../../../TUICore/tim';
-import RepliesItem from './replies-item.vue';
-import { JSONToObject } from '../../utils/utils';
+import { defineComponent, reactive, watchEffect, toRefs, watch, ref } from 'vue'
+import { onClickOutside } from '@vueuse/core'
+import { caculateTimeago } from '../../../utils'
+import { Message } from '../../interface'
+import TIM from '../../../../../TUICore/tim'
+import RepliesItem from './replies-item.vue'
+import { JSONToObject } from '../../utils/utils'
 const ReadReceiptDialog = defineComponent({
   type: 'custom',
   components: {
-    RepliesItem,
+    RepliesItem
   },
   props: {
     message: {
       type: Object,
-      default: () => ({}),
+      default: () => ({})
     },
     isH5: {
       type: Boolean,
-      default: false,
+      default: false
     },
     show: {
       type: Boolean,
-      default: () => false,
+      default: () => false
     },
     url: {
       type: String,
-      default: '',
+      default: ''
     },
     messageList: {
       type: Array,
-      default: () => [],
-    },
+      default: () => []
+    }
   },
   setup(props: any, ctx: any) {
     const data = reactive({
@@ -76,70 +76,70 @@ const ReadReceiptDialog = defineComponent({
       isMenuOpen: true,
       replies: [],
       messageList: [],
-      TIM,
-    });
+      TIM
+    })
 
-    const dialog: any = ref();
+    const dialog: any = ref()
 
     watchEffect(() => {
-      data.message = props.message;
-      data.show = props.show;
-      data.isH5 = props.isH5;
-      data.url = props.url;
-      data.messageList = props.messageList;
-    });
+      data.message = props.message
+      data.show = props.show
+      data.isH5 = props.isH5
+      data.url = props.url
+      data.messageList = props.messageList
+    })
 
     watch(
       () => {
-        data.message, data.messageList;
+        data.message, data.messageList
       },
       () => {
-        data.message = props.message;
-        data.messageList = props.messageList;
-        handleReplies(data.message);
+        data.message = props.message
+        data.messageList = props.messageList
+        handleReplies(data.message)
       },
       { deep: true }
-    );
+    )
 
     const toggleShow = () => {
-      data.show = !data.show;
+      data.show = !data.show
       if (!data.show) {
-        ctx.emit('closeDialog', 'replies');
-        close();
+        ctx.emit('closeDialog', 'replies')
+        close()
       }
-    };
+    }
 
     onClickOutside(dialog, () => {
-      data.show = false;
-      ctx.emit('closeDialog', 'replies');
-      close();
-    });
+      data.show = false
+      ctx.emit('closeDialog', 'replies')
+      close()
+    })
 
     const handleReplies = (message: Message) => {
       try {
-        const { cloudCustomData } = message;
-        if (!cloudCustomData) return;
-        const cloudCustomObject = JSONToObject(cloudCustomData);
-        data.replies = cloudCustomObject?.messageReplies?.replies;
+        const { cloudCustomData } = message
+        if (!cloudCustomData) return
+        const cloudCustomObject = JSONToObject(cloudCustomData)
+        data.replies = cloudCustomObject?.messageReplies?.replies
         data?.replies?.forEach((item: any) => {
-          const { messageID, messageSender } = item;
-          const message = data.messageList.find((item: Message) => 
-            (item.ID === messageID || item.from === messageSender)
-          );
-          item.avatar = message ? (message as Message)?.avatar : '';
-        });
+          const { messageID, messageSender } = item
+          const message = data.messageList.find(
+            (item: Message) => item.ID === messageID || item.from === messageSender
+          )
+          item.avatar = message ? (message as Message)?.avatar : ''
+        })
       } catch (err) {
-        console.log(err);
+        console.log(err)
       }
-    };
+    }
 
     const close = () => {
-      data.message = {};
-    };
+      data.message = {}
+    }
 
     const handleDialogPosition = () => {
-      data.isMenuOpen = !!document?.getElementsByClassName('home-menu')?.length;
-    };
+      data.isMenuOpen = !!document?.getElementsByClassName('home-menu')?.length
+    }
 
     return {
       ...toRefs(data),
@@ -147,10 +147,10 @@ const ReadReceiptDialog = defineComponent({
       toggleShow,
       close,
       caculateTimeago,
-      handleDialogPosition,
-    };
-  },
-});
-export default ReadReceiptDialog;
+      handleDialogPosition
+    }
+  }
+})
+export default ReadReceiptDialog
 </script>
 <style lang="scss" scoped src="./style/index.scss"></style>

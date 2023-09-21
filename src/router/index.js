@@ -99,51 +99,61 @@ function login_im_fn(next) {
     window.$chat = chat
     window.$tx = TencentCloudChat
 
-    next()
-    // 获取总的消息
-    window.$unreadCount = chat.getTotalUnreadMessageCount()
-
-    // 监听总信息
-    let onTotalUnreadMessageCountUpdated = (event) => {
-      window.$unreadCount = event.data
+    // 监听会话未读总数
+    let onTotalUnreadMessageCountUpdated = function ({ data }) {
+      window.$msgCount = data
     }
-    chat.on(
-      TencentCloudChat.EVENT.TOTAL_UNREAD_MESSAGE_COUNT_UPDATED,
+    window.$chat.on(
+      window.$tx.EVENT.TOTAL_UNREAD_MESSAGE_COUNT_UPDATED,
       onTotalUnreadMessageCountUpdated
     )
 
-    //用户被踢下线时触发
-    let onKickedOut = function (event) {
-      if (
-        [
-          TencentCloudChat.TYPES.KICKED_OUT_MULT_ACCOUNT,
-          chat.TYPES.KICKED_OUT_MULT_DEVICE
-        ].includes(event.data.type)
-      ) {
-        message.error('账号异地登录，已退出')
-      } else {
-        message.error('签名过期')
-      }
-    }
-    chat.on(TencentCloudChat.EVENT.KICKED_OUT, onKickedOut)
-
-    // 网络状态
-    let onNetStateChange = function (event) {
-      if (event.data.state === TencentCloudChat.TYPES.NET_STATE_CONNECTING) {
-        message.info('网络正在连接~')
-      } else if (event.data.state === TencentCloudChat.TYPES.NET_STATE_DISCONNECTED) {
-        message.error('网络已断开~')
-      }
-    }
-    chat.on(TencentCloudChat.EVENT.NET_STATE_CHANGE, onNetStateChange)
-
-    // 好友申请触发
-    let onFriendApplicationListUpdated = function (event) {
+    // 监听好友申请未读总数
+    window.$chat.on(window.$tx.EVENT.FRIEND_APPLICATION_LIST_UPDATED, (event) => {
       // unreadCount - 好友申请的未读数
       const { unreadCount } = event.data
       window.$unreadCount = unreadCount
-    }
-    chat.on(TencentCloudChat.EVENT.FRIEND_APPLICATION_LIST_UPDATED, onFriendApplicationListUpdated)
+    })
+    // 获取总的消息
+    window.$msgCount = chat.getTotalUnreadMessageCount()
+
+    //用户被踢下线时触发
+    chat.on(window.$tx.EVENT.KICKED_OUT, ({ data }) => {
+      if (
+        [
+          window.$tx.TYPES.KICKED_OUT_MULT_ACCOUNT,
+          window.$tx.TYPES.KICKED_OUT_MULT_DEVICE
+        ].includes(data.type)
+      ) {
+        message.error('账号异地登录，已退出')
+      } else if (data.type === window.$tx.KICKED_OUT_USERSIG_EXPIRED) {
+        message.error('签名过期')
+      } else {
+        message.error('REST API kick 接口踢出')
+      }
+      window.$api.get_logout().then(() => {
+        Cookies.remove('token')
+        Cookies.remove('userID')
+        Cookies.remove('usersig')
+        window.$chat
+          .logout()
+          .then(() => {})
+          .catch(function (imError) {
+            window.$message.error(imError.message)
+          })
+        router.push('/login')
+      })
+    })
+
+    // 网络状态
+    chat.on(window.$tx.EVENT.NET_STATE_CHANGE, ({ data }) => {
+      if (data.state === window.$tx.TYPES.NET_STATE_CONNECTING) {
+        message.info('网络正在连接~')
+      } else if (data.state === window.$tx.TYPES.NET_STATE_DISCONNECTED) {
+        message.error('网络已断开~')
+      }
+    })
+    next()
   })
   app.use(TUIKit)
 }

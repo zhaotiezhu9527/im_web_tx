@@ -28,17 +28,27 @@ const items = ref({
   message: 0, //会话未读总数
   count: 0 // 好友申请未读数量
 })
+
 onMounted(() => {
-  items.value.message = window.$chat.getTotalUnreadMessageCount()
+  setTimeout(() => {
+    items.value.message = window.$chat.getTotalUnreadMessageCount() || window.$msgCount
+    items.value.count = window.$unreadCount
+  }, 500)
   // 监听会话未读总数
-  window.$chat.on(window.$tx.EVENT.TOTAL_UNREAD_MESSAGE_COUNT_UPDATED, ({ data }) => {
+  let onTotalUnreadMessageCountUpdated = function ({ data }) {
     items.value.message = data
-  })
+    window.$msgCount = data
+  }
+  window.$chat.on(
+    window.$tx.EVENT.TOTAL_UNREAD_MESSAGE_COUNT_UPDATED,
+    onTotalUnreadMessageCountUpdated
+  )
   // 监听好友申请未读总数
   window.$chat.on(window.$tx.EVENT.FRIEND_APPLICATION_LIST_UPDATED, (event) => {
     // unreadCount - 好友申请的未读数
     const { unreadCount } = event.data
     items.value.count = unreadCount
+    window.$unreadCount = unreadCount
   })
 })
 const router = useRouter()

@@ -57,7 +57,6 @@ function dataFn() {
         .then((imResponse) => {
           listAll.value = JSON.parse(JSON.stringify(imResponse.data))
           list.value = imResponse.data
-          console.log(list.value)
         })
     } else {
       list.value = []

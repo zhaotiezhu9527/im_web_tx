@@ -1,11 +1,12 @@
 import { defineStore } from 'pinia'
 
-// 获取表单次数，只请求一次
 export const useToken = defineStore('token', {
   state: () => {
     return {
       token: '',
-      usersig: ''
+      usersig: '',
+      count: 0, // 消息未读
+      unreadCount: 0 // 好友申请
     }
   },
   actions: {

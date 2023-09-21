@@ -1,5 +1,10 @@
 <template>
-  <div class="message-bubble" :class="[message.flow === 'in' ? '' : 'reverse']" ref="htmlRefHook">
+  <div
+    class="message-bubble"
+    @click="change(message)"
+    :class="[message.flow === 'in' ? 'cursor-pointer' : 'reverse']"
+    ref="htmlRefHook"
+  >
     <img
       class="avatar"
       :src="message?.avatar || 'https://web.sdk.qcloud.com/component/TUIKit/assets/avatar_21.png'"
@@ -28,14 +33,27 @@
         </div>
         <slot />
         <div v-if="dropdown" ref="dropdownRef" class="dropdown-inner">
-          <div class="dialog" :class="[message.flow === 'in' ? '' : 'dialog-right']" @click="dropdown = false">
+          <div
+            class="dialog"
+            :class="[message.flow === 'in' ? '' : 'dialog-right']"
+            @click="dropdown = false"
+          >
             <slot name="dialog" />
           </div>
         </div>
-        <MessageEmojiReact :message="message" type="content" v-if="needEmojiReact && isEmojiReactionInMessage(message)" />
+        <MessageEmojiReact
+          :message="message"
+          type="content"
+          v-if="needEmojiReact && isEmojiReactionInMessage(message)"
+        />
       </div>
     </main>
-    <label class="message-label fail" v-if="message.status === 'fail'" @click="resendMessage(message)">!</label>
+    <label
+      class="message-label fail"
+      v-if="message.status === 'fail'"
+      @click="resendMessage(message)"
+      >!</label
+    >
     <label
       class="message-label"
       :class="readReceiptStyle(message)"
@@ -73,58 +91,58 @@
 </template>
 
 <script lang="ts">
-import { decodeText } from '../utils/decodeText';
-import constant from '../../constant';
-import { defineComponent, watchEffect, reactive, toRefs, ref, nextTick, watch } from 'vue';
-import { onClickOutside, onLongPress, useElementBounding } from '@vueuse/core';
-import { deepCopy, JSONToObject } from '../utils/utils';
-import { handleErrorPrompts } from '../../utils';
-import TUIChat from '../index.vue';
-import MessageReference from './message-reference.vue';
-import { Message } from '../interface';
-import { TUIEnv } from '../../../../TUIPlugin';
-import MessageEmojiReact from './message-emoji-react.vue';
-import TIM from '../../../../TUICore/tim/index';
+import { decodeText } from '../utils/decodeText'
+import constant from '../../constant'
+import { defineComponent, watchEffect, reactive, toRefs, ref, nextTick, watch } from 'vue'
+import { onClickOutside, onLongPress, useElementBounding } from '@vueuse/core'
+import { deepCopy, JSONToObject } from '../utils/utils'
+import { handleErrorPrompts } from '../../utils'
+import TUIChat from '../index.vue'
+import MessageReference from './message-reference.vue'
+import { Message } from '../interface'
+import { TUIEnv } from '../../../../TUIPlugin'
+import MessageEmojiReact from './message-emoji-react.vue'
+import TIM from '../../../../TUICore/tim/index'
 
 const messageBubble = defineComponent({
   props: {
     data: {
       type: Object,
-      default: () => ({}),
+      default: () => ({})
     },
     messagesList: {
       type: Array,
-      default: () => [],
+      default: () => []
     },
     isH5: {
       type: Boolean,
-      default: false,
+      default: false
     },
     needGroupReceipt: {
       type: Boolean,
-      default: false,
+      default: false
     },
     needReplies: {
       type: Boolean,
-      default: true,
+      default: true
     },
     flow: {
       type: String,
-      default: '',
+      default: ''
     },
     needEmojiReact: {
       type: Boolean,
-      default: false,
-    },
+      default: false
+    }
   },
   emits: ['jumpID', 'resendMessage', 'showReadReceiptDialog', 'showRepliesDialog', 'dropDownOpen'],
   components: {
     MessageReference,
-    MessageEmojiReact,
+    MessageEmojiReact
   },
   setup(props: any, ctx: any) {
-    const { t } = (window as any).TUIKitTUICore.config.i18n.useI18n();
-    const { TUIServer } = TUIChat;
+    const { t } = (window as any).TUIKitTUICore.config.i18n.useI18n()
+    const { TUIServer } = TUIChat
     const data = reactive({
       env: TUIEnv(),
       message: {} as Message,
@@ -139,154 +157,162 @@ const messageBubble = defineComponent({
       replies: [],
       face: [],
       url: '',
-      needEmojiReact: false,
-    });
+      needEmojiReact: false
+    })
 
     watchEffect(() => {
-      data.type = constant;
-      data.messagesList = props.messagesList;
-      data.needEmojiReact = props.needEmojiReact;
+      data.type = constant
+      data.messagesList = props.messagesList
+      data.needEmojiReact = props.needEmojiReact
       data.message = deepCopy(
-        data.messagesList?.find((item: any) => (item as any)?.ID === props.message?.ID) || props.data
-      );
-      data.needGroupReceipt = props.needGroupReceipt;
-      data.needReplies = props.needReplies;
+        data.messagesList?.find((item: any) => (item as any)?.ID === props.message?.ID) ||
+          props.data
+      )
+      data.needGroupReceipt = props.needGroupReceipt
+      data.needReplies = props.needReplies
       if ((data.message as any).cloudCustomData) {
-        const messageIDList: any[] = [];
-        const cloudCustomData = JSONToObject((data.message as any).cloudCustomData);
-        data.replies = cloudCustomData?.messageReplies?.replies || [];
-        data.referenceMessage = cloudCustomData.messageReply ? cloudCustomData.messageReply : '';
+        const messageIDList: any[] = []
+        const cloudCustomData = JSONToObject((data.message as any).cloudCustomData)
+        data.replies = cloudCustomData?.messageReplies?.replies || []
+        data.referenceMessage = cloudCustomData.messageReply ? cloudCustomData.messageReply : ''
         for (let index = 0; index < (data.messagesList as any).length; index++) {
           // To determine whether the referenced message is still in the message list, the corresponding field of the referenced message is displayed if it is in the message list. Otherwise, messageabstract/messagesender is displayed
-          messageIDList.push((data.messagesList as any)[index].ID);
-          (data as any).allMessageID = JSON.stringify(messageIDList);
+          messageIDList.push((data.messagesList as any)[index].ID)
+          ;(data as any).allMessageID = JSON.stringify(messageIDList)
           if ((data.messagesList as any)[index].ID === (data.referenceMessage as any)?.messageID) {
-            data.referenceForShow = (data.messagesList as any)[index];
+            data.referenceForShow = (data.messagesList as any)[index]
             if ((data.referenceMessage as any).messageType === constant.typeText) {
-              (data as any).face = decodeText((data.referenceForShow as any).payload);
+              ;(data as any).face = decodeText((data.referenceForShow as any).payload)
             }
             if ((data.referenceMessage as any).messageType === constant.typeFace) {
-              (data as any).url = `https://web.sdk.qcloud.com/im/assets/face-elem/${
+              ;(data as any).url = `https://web.sdk.qcloud.com/im/assets/face-elem/${
                 (data.referenceForShow as any).payload.data
-              }@2x.png`;
+              }@2x.png`
             }
           }
         }
       } else {
-        data.replies = [];
+        data.replies = []
       }
-    });
+    })
 
-    const htmlRefHook = ref<HTMLElement | null>(null);
-    const dropdown = ref(false);
-    const dropdownRef = ref(null);
+    const htmlRefHook = ref<HTMLElement | null>(null)
+    const dropdown = ref(false)
+    const dropdownRef = ref(null)
 
     const toggleDialog = (e: any) => {
-      dropdown.value = !dropdown.value;
+      dropdown.value = !dropdown.value
       if (dropdown.value) {
-        ctx.emit('dropDownOpen', dropdownRef);
+        ctx.emit('dropDownOpen', dropdownRef)
         nextTick(() => {
-          const dialogDom = (dropdownRef as any)?.value?.children[0];
-          const dialogElement = document.getElementsByClassName('dialog-item')[0] as HTMLElement;
-          const parentDom = (dropdownRef as any)?.value?.offsetParent;
-          const parentBound = useElementBounding(parentDom);
-          const messageListDom = document.getElementById('messageEle') as HTMLElement;
-          const messageListBound = useElementBounding(messageListDom);
-          const leftRange = messageListBound?.left?.value;
+          const dialogDom = (dropdownRef as any)?.value?.children[0]
+          const dialogElement = document.getElementsByClassName('dialog-item')[0] as HTMLElement
+          const parentDom = (dropdownRef as any)?.value?.offsetParent
+          const parentBound = useElementBounding(parentDom)
+          const messageListDom = document.getElementById('messageEle') as HTMLElement
+          const messageListBound = useElementBounding(messageListDom)
+          const leftRange = messageListBound?.left?.value
           const rightRange =
-            messageListBound?.left?.value + (messageListDom as any).clientWidth - dialogDom.clientWidth + 76;
-          const topRange = messageListBound?.top?.value;
+            messageListBound?.left?.value +
+            (messageListDom as any).clientWidth -
+            dialogDom.clientWidth +
+            76
+          const topRange = messageListBound?.top?.value
           const bottomRange =
-            messageListBound?.top?.value + (messageListDom as any).clientHeight - dialogDom.clientHeight;
-          const { clientX, clientY } = e;
+            messageListBound?.top?.value +
+            (messageListDom as any).clientHeight -
+            dialogDom.clientHeight
+          const { clientX, clientY } = e
           if (data?.env?.isH5) {
             if (parentBound?.top?.value <= dialogElement?.clientHeight) {
-              dialogDom.style.bottom = `-${dialogElement?.clientHeight}px`;
+              dialogDom.style.bottom = `-${dialogElement?.clientHeight}px`
             } else {
               if (data?.message?.flow === 'in') {
-                dialogDom.style.top = `-${dialogElement?.clientHeight - 20}px`;
+                dialogDom.style.top = `-${dialogElement?.clientHeight - 20}px`
               } else {
-                dialogDom.style.top = `-${dialogElement?.clientHeight}px`;
+                dialogDom.style.top = `-${dialogElement?.clientHeight}px`
               }
             }
-            const centerWidth = parentBound?.left?.value + parentBound?.width?.value / 2;
+            const centerWidth = parentBound?.left?.value + parentBound?.width?.value / 2
             if (
               centerWidth > dialogElement.clientWidth / 2 &&
               centerWidth < messageListDom?.clientWidth - dialogElement.clientWidth / 2
             ) {
-              dialogDom.style.left = 'calc(50% - 135px)';
+              dialogDom.style.left = 'calc(50% - 135px)'
             } else if (centerWidth <= dialogElement.clientWidth / 2) {
-              dialogDom.style.left = '-20px';
+              dialogDom.style.left = '-20px'
             } else {
-              dialogDom.style.left = `-${dialogElement.clientWidth / 2 + 10}px`;
+              dialogDom.style.left = `-${dialogElement.clientWidth / 2 + 10}px`
             }
-            return;
+            return
           }
           switch (true) {
             case clientX > leftRange && clientX < rightRange:
-              dialogDom.style.left = `${Math.max(e.clientX - parentBound?.left?.value - 76, -40)}px`;
-              break;
+              dialogDom.style.left = `${Math.max(e.clientX - parentBound?.left?.value - 76, -40)}px`
+              break
             case clientX <= leftRange:
-              dialogDom.style.left = '20px';
-              break;
+              dialogDom.style.left = '20px'
+              break
             case clientX >= rightRange:
               dialogDom.style.right = `${Math.max(
                 parentBound?.left?.value + parentDom?.clientWidth - e.clientX - 256,
                 -10
-              )}px`;
-              break;
+              )}px`
+              break
           }
           switch (true) {
             case clientY > topRange && clientY < bottomRange:
-              dialogDom.style.top = `${e.clientY - parentBound?.top?.value}px`;
-              dialogDom.style.cssText = dialogDom.style.cssText.replace('align-items:end;', '');
-              break;
+              dialogDom.style.top = `${e.clientY - parentBound?.top?.value}px`
+              dialogDom.style.cssText = dialogDom.style.cssText.replace('align-items:end;', '')
+              break
             case clientY <= topRange:
-              dialogDom.style.top = '0px';
-              dialogDom.style.cssText = dialogDom.style.cssText.replace('align-items:end;', '');
-              break;
+              dialogDom.style.top = '0px'
+              dialogDom.style.cssText = dialogDom.style.cssText.replace('align-items:end;', '')
+              break
             case clientY >= bottomRange:
-              dialogDom.style.bottom = `${parentBound?.top?.value + parentDom?.clientHeight - e.clientY}px`;
-              dialogDom.style.cssText += 'align-items:end;';
-              break;
+              dialogDom.style.bottom = `${
+                parentBound?.top?.value + parentDom?.clientHeight - e.clientY
+              }px`
+              dialogDom.style.cssText += 'align-items:end;'
+              break
           }
-        });
+        })
       }
-    };
+    }
 
     const jumpToAim = (message: any) => {
       if (
         (data.referenceMessage as any)?.messageID &&
         data.allMessageID.includes((data.referenceMessage as any)?.messageID)
       ) {
-        ctx.emit('jumpID', (data.referenceMessage as any).messageID);
+        ctx.emit('jumpID', (data.referenceMessage as any).messageID)
       } else {
-        const message = t('TUIChat.无法定位到原消息');
-        handleErrorPrompts(message, props);
+        const message = t('TUIChat.无法定位到原消息')
+        handleErrorPrompts(message, props)
       }
-    };
+    }
 
     onClickOutside(dropdownRef, () => {
-      dropdown.value = false;
-    });
+      dropdown.value = false
+    })
 
     const toggleDialogH5 = (e: any) => {
-      if (data?.env?.isH5) toggleDialog(e);
-      return;
-    };
+      if (data?.env?.isH5) toggleDialog(e)
+      return
+    }
 
-    onLongPress(htmlRefHook, toggleDialogH5);
+    onLongPress(htmlRefHook, toggleDialogH5)
 
     const resendMessage = (message: any) => {
-      ctx.emit('resendMessage', message);
-    };
+      ctx.emit('resendMessage', message)
+    }
 
     const showReadReceiptTag = (message: any) => {
       if (message.flow === 'out' && message.status === 'success' && message.needReadReceipt) {
-        return true;
+        return true
       }
-      return false;
-    };
+      return false
+    }
 
     const readReceiptStyle = (message: any) => {
       if (
@@ -294,10 +320,10 @@ const messageBubble = defineComponent({
         (message?.readReceiptInfo?.isPeerRead === undefined && message?.isPeerRead) ||
         message?.readReceiptInfo?.unreadCount === 0
       ) {
-        return '';
+        return ''
       }
-      return 'unRead';
-    };
+      return 'unRead'
+    }
 
     const readReceiptCont = (message: any) => {
       switch (message.conversationType) {
@@ -306,72 +332,79 @@ const messageBubble = defineComponent({
             message?.readReceiptInfo?.isPeerRead ||
             (message?.readReceiptInfo?.isPeerRead === undefined && message?.isPeerRead)
           ) {
-            return t('TUIChat.已读');
+            return t('TUIChat.已读')
           }
-          return t('TUIChat.未读');
+          return t('TUIChat.未读')
         case TUIServer.TUICore.TIM.TYPES.CONV_GROUP:
           if (message.readReceiptInfo.unreadCount === 0) {
-            return t('TUIChat.全部已读');
+            return t('TUIChat.全部已读')
           }
           if (
             message.readReceiptInfo.readCount === 0 ||
-            (message.readReceiptInfo.unreadCount === undefined && message.readReceiptInfo.readCount === undefined)
+            (message.readReceiptInfo.unreadCount === undefined &&
+              message.readReceiptInfo.readCount === undefined)
           ) {
-            return t('TUIChat.未读');
+            return t('TUIChat.未读')
           }
-          return `${message.readReceiptInfo.readCount + t('TUIChat.人已读')}`;
+          return `${message.readReceiptInfo.readCount + t('TUIChat.人已读')}`
         default:
-          return '';
+          return ''
       }
-    };
+    }
 
     const showReadReceiptDialog = (message: any) => {
-      ctx.emit('showReadReceiptDialog', message, 'receipt');
-    };
+      ctx.emit('showReadReceiptDialog', message, 'receipt')
+    }
 
     const showRepliesDialog = (message: any, isRoot: boolean) => {
       if (isRoot) {
-        ctx.emit('showRepliesDialog', message, 'replies');
-        return;
+        ctx.emit('showRepliesDialog', message, 'replies')
+        return
       }
       if ((data.referenceMessage as any)?.messageRootID) {
         const message = data.messagesList?.find(
           (item: Message) => item.ID === (data.referenceMessage as any)?.messageRootID
-        );
+        )
         if (message) {
-          ctx.emit('showRepliesDialog', message, 'replies');
-          return;
+          ctx.emit('showRepliesDialog', message, 'replies')
+          return
         } else {
-          const message = t('TUIChat.无法定位到原消息');
-          handleErrorPrompts(message, props);
+          const message = t('TUIChat.无法定位到原消息')
+          handleErrorPrompts(message, props)
         }
       }
-    };
+    }
 
     const handleImageOrVideoBubbleStyle = (message: Message) => {
-      const classNameList = ['content'];
-      if (!message) return classNameList;
-      classNameList.push(`content-${data.message.flow}`);
+      const classNameList = ['content']
+      if (!message) return classNameList
+      classNameList.push(`content-${data.message.flow}`)
       if (data.message.type === TIM.TYPES.MSG_IMAGE && !isEmojiReactionInMessage(message)) {
-        classNameList.push('content-image');
+        classNameList.push('content-image')
       }
       if (data.message.type === TIM.TYPES.MSG_VIDEO && !isEmojiReactionInMessage(message)) {
-        classNameList.push('content-video');
+        classNameList.push('content-video')
       }
-      return classNameList;
-    };
+      return classNameList
+    }
 
     const isEmojiReactionInMessage = (message: Message) => {
       try {
-        if (!message?.cloudCustomData) return;
-        const reactList = JSONToObject(message?.cloudCustomData)?.messageReact?.reacts;
-        if (!reactList || Object.keys(reactList).length === 0) return false;
-        return true;
+        if (!message?.cloudCustomData) return
+        const reactList = JSONToObject(message?.cloudCustomData)?.messageReact?.reacts
+        if (!reactList || Object.keys(reactList).length === 0) return false
+        return true
       } catch (err) {
-        console.warn(err);
-        return false;
+        console.warn(err)
+        return false
       }
-    };
+    }
+
+    const change = (message: Message) => {
+      if (message.flow === 'in') {
+        console.log(message.from)
+      }
+    }
 
     return {
       ...toRefs(data),
@@ -388,11 +421,12 @@ const messageBubble = defineComponent({
       showRepliesDialog,
       handleImageOrVideoBubbleStyle,
       isEmojiReactionInMessage,
-      TIM,
-    };
-  },
-});
-export default messageBubble;
+      change,
+      TIM
+    }
+  }
+})
+export default messageBubble
 </script>
 <style lang="scss" scoped>
 @import url('../../../styles/common.scss');

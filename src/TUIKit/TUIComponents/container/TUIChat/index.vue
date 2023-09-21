@@ -101,34 +101,37 @@
       />
     </div>
     <div class="TUIChat-footer" :class="[isMute && 'disabled', env.isH5 && 'TUIChat-H5-footer']">
-      <div class="func" id="func">
-        <main class="func-main">
-          <component
-            v-for="(item, index) in pluginComponentList"
-            :key="index"
-            :isMute="isMute"
-            :is="item"
-            :isH5="env.isH5"
-            :conversation="conversation"
-            parentID="func"
-            @send="handleSend"
-          ></component>
-        </main>
-      </div>
-      <MessageInput
-        ref="messageInput"
-        :conversation="conversation"
-        :memberList="allMemberList"
-        :env="env"
-        :isGroup="userInfo?.isGroup"
-        :replyOrReference="reference"
-        :isMute="isMute"
-        :muteText="muteText"
-        :placeholder="$t('TUIChat.请输入消息')"
-        @sendMessage="reportMessageSend"
-        @resetReplyOrReference="resetReplyOrReference"
-        @onTyping="handleTyping"
-      ></MessageInput>
+      <div v-if="!is_footer" class="model">您的好友已将你删除或拉入黑名单</div>
+      <template v-else>
+        <div class="func" id="func">
+          <main class="func-main">
+            <component
+              v-for="(item, index) in pluginComponentList"
+              :key="index"
+              :isMute="isMute"
+              :is="item"
+              :isH5="env.isH5"
+              :conversation="conversation"
+              parentID="func"
+              @send="handleSend"
+            ></component>
+          </main>
+        </div>
+        <MessageInput
+          ref="messageInput"
+          :conversation="conversation"
+          :memberList="allMemberList"
+          :env="env"
+          :isGroup="userInfo?.isGroup"
+          :replyOrReference="reference"
+          :isMute="isMute"
+          :muteText="muteText"
+          :placeholder="$t('TUIChat.请输入消息')"
+          @sendMessage="reportMessageSend"
+          @resetReplyOrReference="resetReplyOrReference"
+          @onTyping="handleTyping"
+        ></MessageInput>
+      </template>
     </div>
     <div v-show="showResend" class="mask" @click="showResend = false">
       <div class="mask-main">
@@ -187,6 +190,7 @@ import { Message } from './interface'
 import { Conversation } from '../TUIConversation/interface'
 
 import MessageInput from './message-input'
+import { NodeViewContent } from '@tiptap/vue-3'
 
 const TUIChat: any = defineComponent({
   name: 'TUIChat',
@@ -275,7 +279,8 @@ const TUIChat: any = defineComponent({
       isMsgNeedReadReceipt: false,
       isNeedEmojiReact: false,
       dropDownRef: null,
-      typingRef: null
+      typingRef: null,
+      is_footer: true
     })
 
     const slotDefault = !!useSlots().default
@@ -363,15 +368,34 @@ const TUIChat: any = defineComponent({
       data.isNeedEmojiReact = props.isNeedEmojiReact
     })
     const conversationType: any = ref()
+    const is_footer: any = ref()
+
+    const checkFriendFn = (userID) => {
+      window.$chat
+        .checkFriend({
+          type: window.$tx.TYPES.SNS_CHECK_TYPE_BOTH,
+          userIDList: [userID]
+        })
+        .then(({ data }) => {
+          let { relation } = data.successUserIDList[0]
+          is_footer.value = relation !== 'CheckResult_Type_NoRelation'
+        })
+    }
     watch(
       () => data?.conversation,
       (newVal) => {
-        console.log(newVal, '.....')
         if (!newVal?.conversationID) {
           conversationType.value = ''
         } else if (newVal?.type === TUIServer.TUICore.TIM.TYPES.CONV_SYSTEM) {
           conversationType.value = 'system'
         } else {
+          // 获取好友关系
+          let userID = newVal?.conversationID.substring(3)
+          checkFriendFn(userID)
+          // 黑名单列表更新
+          window.$chat.on(window.$tx.EVENT.BLACKLIST_UPDATED, () => checkFriendFn(userID))
+          // 好友列表更新
+          window.$chat.on(window.$tx.EVENT.FRIEND_LIST_UPDATED, () => checkFriendFn(userID))
           conversationType.value = 'chat'
           getHistoryMessageList()
         }
@@ -867,6 +891,7 @@ const TUIChat: any = defineComponent({
 
     return {
       ...toRefs(data),
+      is_footer,
       conversationType,
       messages,
       messageEle,

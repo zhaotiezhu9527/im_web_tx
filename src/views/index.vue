@@ -7,8 +7,8 @@
           v-for="(item, index) in list"
           :key="index"
           class="flex items-center item"
-          :class="{ active: active === index }"
-          @click="routePage(item, index)"
+          :class="{ active: active === item.conversationID }"
+          @click="routePage(item)"
           @contextmenu.prevent.stop="rightChange($event, item)"
         >
           <a-badge :count="item.unreadCount">
@@ -55,11 +55,11 @@ dayjs.extend(relativeTime)
 const list = ref([])
 const active = ref(null)
 const route = useRoute()
-const userID = ref('')
 const chatRef = ref({})
 onMounted(() => {
   if (route.query.c) {
-    window.$chat.getConversationProfile(route.query.c).then((imResponse) => {
+    active.value = 'C2C' + route.query.c
+    window.$chat.getConversationProfile('C2C' + route.query.c).then((imResponse) => {
       if (imResponse.data.conversation) {
         let TUIServer = window.TUIKitTUICore.TUIServer
         TUIServer.TUISearch.TUICore.TUIServer.TUIConversation.handleCurrentConversation(
@@ -88,9 +88,8 @@ function dataFn() {
     list.value = data.conversationList
   })
 }
-function routePage(item, index) {
-  userID.value = ''
-  active.value = index
+function routePage(item) {
+  active.value = item.conversationID
   window.$chat.getConversationProfile(item.conversationID).then((imResponse) => {
     if (imResponse.data.conversation) {
       let TUIServer = window.TUIKitTUICore.TUIServer
