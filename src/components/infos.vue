@@ -135,6 +135,7 @@ function genderFn() {
   }
   return name
 }
+const emit = defineEmits(['ok'])
 // 刷新后获取个人信息
 function dataFn() {
   window.$chat
@@ -192,6 +193,7 @@ function input() {
     })
     .then(() => {
       window.$message.success('修改成功！')
+      emit('ok')
     })
 }
 function showChange() {
@@ -218,6 +220,7 @@ function handleOk() {
       } else if (code === 0) {
         window.$message.success('添加好友成功！')
       }
+      emit('ok')
       form.value.open = false
       cancel()
     })
@@ -271,6 +274,7 @@ function blackChange() {
       .then(() => {
         // 删除会话，不删除记录
         form.value.type = 'black'
+        emit('ok')
         window.$chat.getConversationList([`C2C${items.value.userID}`]).then(({ data }) => {
           if (data.conversationList.length) {
             window.$chat
@@ -289,6 +293,7 @@ function blackChange() {
     window.$chat
       .removeFromBlacklist({ userIDList: [items.value.userID] })
       .then(() => {
+        emit('ok')
         form.value.type = ''
         addFriend()
       })
@@ -306,7 +311,9 @@ function addFriend() {
       groupName: '好友',
       type: window.$tx.TYPES.SNS_ADD_TYPE_BOTH // 双向添加
     })
-    .then(() => {})
+    .then(() => {
+      dataFn()
+    })
 }
 
 // 关闭添加好友对话框

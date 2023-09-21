@@ -38,7 +38,7 @@
         </a-empty>
       </div>
       <div class="chat">
-        <infoscn ref="infoRef" />
+        <infoscn ref="infoRef" @ok="dataFn" />
         <i class="iconfont icon-icon-test37" v-if="!infos"></i>
       </div>
     </div>
@@ -62,6 +62,8 @@ onMounted(() => {
   window.$chat.on(window.$tx.EVENT.PROFILE_UPDATED, () => dataFn())
   // 好友列表更新
   window.$chat.on(window.$tx.EVENT.FRIEND_LIST_UPDATED, () => dataFn())
+  // 黑名单列表更新
+  window.$chat.on(window.$tx.EVENT.BLACKLIST_UPDATED, () => dataFn())
   // 好友申请触发
   window.$chat.on(window.$tx.EVENT.FRIEND_APPLICATION_LIST_UPDATED, (event) => {
     // unreadCount - 好友申请的未读数
@@ -75,7 +77,11 @@ const listAll = ref([])
 const search = ref('')
 function dataFn() {
   window.$chat.getFriendList().then(({ data }) => {
-    if (!data.length) return false
+    if (!data.length) {
+      list.value = []
+      listAll.value = JSON.parse(JSON.stringify(list.value))
+      return false
+    }
     data.forEach((e) => {
       e.cn = pinyin(e.remark || e.profile.nick)
       e.en = pinyin(e.remark || e.profile.nick).slice(0, 1)
@@ -91,11 +97,12 @@ function dataFn() {
         })
       }
     })
-
+    console.log(list.value)
     list.value = list.value.map((item) => {
       return {
         en: item.en,
         list: item.list.sort((a, b) => {
+          console.log(a)
           return a.cn.localeCompare(b.cn)
         })
       }

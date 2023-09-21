@@ -17,7 +17,7 @@
           @click="routePage(item, index)"
         >
           <a-avatar shape="square" :src="item.avatar" :size="40" />
-          <div class="pl-2 text-14px" v-html="titleFn(item.remark || item.profile.nick)"></div>
+          <div class="pl-2 text-14px" v-html="titleFn(item.nick)"></div>
         </div>
         <a-empty description="暂无数据" :image="simpleImage" class="pt-10" v-if="!list.length">
         </a-empty>
@@ -63,9 +63,7 @@ function dataFn() {
 // 搜索
 function change() {
   let all = JSON.parse(JSON.stringify(listAll.value))
-  list.value = all.filter(
-    (item) => item.profile.nick.includes(search.value) || item.remark.includes(search.value)
-  )
+  list.value = all.filter((item) => item.nick.includes(search.value))
 }
 const detailRef = ref({})
 const active = ref(null)
