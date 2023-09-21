@@ -64,7 +64,6 @@ const router = createRouter({
 const WHILE_LIST = ['/login', '/register']
 router.beforeEach((to, from, next) => {
   let token = Cookies.get('token')
-  console.log(to)
   if (!WHILE_LIST.includes(to.path) && !token) {
     router.push('/login')
   } else if (WHILE_LIST.includes(to.path) || window.$chat) {

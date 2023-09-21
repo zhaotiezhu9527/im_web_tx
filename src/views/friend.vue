@@ -109,9 +109,12 @@ function dataFn() {
 
 function change() {
   let all = JSON.parse(JSON.stringify(listAll.value))
-  list.value = all.filter(
-    (item) => item.profile.nick.includes(search.value) || item.remark.includes(search.value)
-  )
+  list.value = all.filter((item) => {
+    item.list = item.list.filter(
+      (e) => e?.profile?.nick.includes(search.value) || e?.remark.includes(search.value)
+    )
+    return item.list.length
+  })
 }
 const infoRef = ref({})
 const infos = ref('')
@@ -172,7 +175,7 @@ function titleFn(e) {
 }
 .title {
   font-size: 14px;
-  padding: 4px;
+  padding: 4px 8px;
 }
 .item {
   width: 100%;

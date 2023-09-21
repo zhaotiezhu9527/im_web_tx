@@ -52,7 +52,7 @@ function logout() {
       .logout()
       .then(() => {})
       .catch(function (imError) {
-        console.warn('logout error:', imError)
+        window.$message.error(imError.message)
       })
     router.push('/login')
   })
