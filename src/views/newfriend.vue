@@ -17,7 +17,7 @@
           @click="routePage(item, index)"
         >
           <a-avatar shape="square" :src="item.avatar" :size="40" />
-          <div class="pl-2 text-14px">{{ item.nick }}</div>
+          <div class="pl-2 text-14px" v-html="titleFn(item.remark || item.profile.nick)"></div>
         </div>
         <a-empty description="暂无数据" :image="simpleImage" class="pt-10" v-if="!list.length">
         </a-empty>
@@ -40,6 +40,7 @@ const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE
 const router = useRouter()
 // 获取好友列表
 const list = ref([])
+const listAll = ref([])
 const search = ref('')
 const infos = ref('')
 
@@ -48,23 +49,34 @@ onMounted(() => {
   // 好友申请触发
   window.$chat.on(window.$tx.EVENT.FRIEND_APPLICATION_LIST_UPDATED, (event) => {
     const { friendApplicationList } = event.data
+    JSON.parse(JSON.stringify(friendApplicationList))
     list.value = friendApplicationList
   })
 })
 
 function dataFn() {
   window.$chat.getFriendApplicationList().then(({ data }) => {
+    listAll.value = JSON.parse(JSON.stringify(data.friendApplicationList))
     list.value = data.friendApplicationList
   })
 }
 // 搜索
-function change() {}
+function change() {
+  let all = JSON.parse(JSON.stringify(listAll.value))
+  list.value = all.filter(
+    (item) => item.profile.nick.includes(search.value) || item.remark.includes(search.value)
+  )
+}
 const detailRef = ref({})
 const active = ref(null)
 function routePage(vim, index) {
   active.value = index
   infos.value = vim
   detailRef.value.open(vim)
+}
+function titleFn(e) {
+  let title = e.replace(search.value, `<span class='green-c'>${search.value}</span>`)
+  return title
 }
 </script>
 <style lang="scss" scoped>
@@ -141,6 +153,9 @@ function routePage(vim, index) {
   }
   .iconfont {
     color: #fff;
+  }
+  :deep(.green-c) {
+    color: #0052d9;
   }
 }
 </style>
