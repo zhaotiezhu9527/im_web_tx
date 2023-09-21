@@ -9,6 +9,7 @@
           class="flex items-center item"
           :class="{ active: active === index }"
           @click="routePage(item, index)"
+          @contextmenu.prevent.stop="rightChange($event, item)"
         >
           <a-badge :count="item.unreadCount">
             <a-avatar shape="square" :src="item?.userProfile?.avatar" :size="40" />
@@ -34,6 +35,9 @@
         </TUIChat>
       </div>
     </div>
+    <context-menu v-model:show="show" :options="options">
+      <context-menu-item label="删除聊天" @click="onMenuClick" />
+    </context-menu>
   </div>
 </template>
 
@@ -95,6 +99,27 @@ function routePage(item, index) {
       )
       chatRef.value.conversation = imResponse.data.conversation
     }
+  })
+}
+const show = ref(false)
+const options = ref({
+  zIndex: 3,
+  width: 60,
+  x: 500,
+  y: 200
+})
+const that = ref({})
+function rightChange(e, vim) {
+  options.value.x = e.x
+  options.value.y = e.y
+  show.value = true
+  that.value = vim
+}
+// 删除聊天
+function onMenuClick() {
+  window.$chat.deleteConversation(that.value.conversationID).then(() => {
+    window.$message.success('删除成功')
+    dataFn()
   })
 }
 </script>

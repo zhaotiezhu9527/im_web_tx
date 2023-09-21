@@ -56,6 +56,11 @@ const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE
 const router = useRouter()
 const count = ref(0)
 
+const list = ref([])
+const listAll = ref([])
+const search = ref('')
+
+//For component
 dataFn()
 onMounted(() => {
   //好友或者自己的资料更新
@@ -72,13 +77,11 @@ onMounted(() => {
   })
 })
 // 获取好友列表
-const list = ref([])
-const listAll = ref([])
-const search = ref('')
 function dataFn() {
+  list.value = []
+  listAll.value = []
   window.$chat.getFriendList().then(({ data }) => {
     if (!data.length) {
-      list.value = []
       listAll.value = JSON.parse(JSON.stringify(list.value))
       return false
     }
@@ -97,7 +100,6 @@ function dataFn() {
         })
       }
     })
-    console.log(list.value)
     list.value = list.value.map((item) => {
       return {
         en: item.en,

@@ -136,14 +136,14 @@ const editor = useEditor({
 const editorContainer = ref()
 
 const handleEnter = (e: any) => {
-  if (isH5?.value) {
-    return
-  }
+  // if (isH5?.value) {
+  //   return
+  // }
   e?.preventDefault()
   e?.stopPropagation()
   if (e.keyCode === 13 && e.ctrlKey) {
-    // ctrl + enter: warp
     editor?.value?.commands?.insertContent('<p></p>')
+    // ctrl + enter: warp
   } else if (e.keyCode === 13) {
     // enter only: send message
     emits('sendMessage')
