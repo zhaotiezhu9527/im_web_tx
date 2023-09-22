@@ -396,6 +396,8 @@ const TUIChat: any = defineComponent({
           window.$chat.on(window.$tx.EVENT.BLACKLIST_UPDATED, () => checkFriendFn(userID))
           // 好友列表更新
           window.$chat.on(window.$tx.EVENT.FRIEND_LIST_UPDATED, () => checkFriendFn(userID))
+          // 好友的资料更新
+          window.$chat.on(window.$tx.EVENT.PROFILE_UPDATED, () => checkFriendFn(userID))
           conversationType.value = 'chat'
           getHistoryMessageList()
         }

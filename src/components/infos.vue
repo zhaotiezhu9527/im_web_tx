@@ -35,7 +35,7 @@
           class="my-3"
           type="primary"
           @click="service"
-          v-if="form.relation === 'CheckResult_Type_BothWay' && form.type !== 'message'"
+          v-if="form.relation === 'CheckResult_Type_BothWay'"
         >
           聊天
         </a-button>
@@ -264,6 +264,7 @@ function deleteFn() {
 // 聊天
 function service() {
   router.push(`/?c=${items.value.userID}`)
+  emit('ok')
 }
 // 加入移除黑名单
 function blackChange() {

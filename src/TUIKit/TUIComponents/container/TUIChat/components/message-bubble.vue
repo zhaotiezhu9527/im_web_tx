@@ -1,15 +1,16 @@
 <template>
   <div
     class="message-bubble"
-    @click="change(message)"
     :class="[message.flow === 'in' ? 'cursor-pointer' : 'reverse']"
     ref="htmlRefHook"
   >
-    <img
-      class="avatar"
-      :src="message?.avatar || 'https://web.sdk.qcloud.com/component/TUIKit/assets/avatar_21.png'"
-      onerror="this.src='https://web.sdk.qcloud.com/component/TUIKit/assets/avatar_21.png'"
-    />
+    <div @click="change(message)">
+      <img
+        class="avatar"
+        :src="message?.avatar || 'https://web.sdk.qcloud.com/component/TUIKit/assets/avatar_21.png'"
+        onerror="this.src='https://web.sdk.qcloud.com/component/TUIKit/assets/avatar_21.png'"
+      />
+    </div>
     <main class="message-area">
       <label class="name" v-if="message.flow === 'in' && message.conversationType === 'GROUP'">
         {{ message.nameCard || message.nick || message.from }}
@@ -88,6 +89,12 @@
     <i class="icon icon-msg-replies"></i>
     <span>{{ replies?.length + $t('TUIChat.条回复') }}</span>
   </label>
+  <a-modal v-model:open="open" title="" style="width: 440px" centered>
+    <div class="p-10">
+      <infos ref="infosRef" @ok="open = false" />
+    </div>
+    <template #footer> </template>
+  </a-modal>
 </template>
 
 <script lang="ts">
@@ -103,6 +110,7 @@ import { Message } from '../interface'
 import { TUIEnv } from '../../../../TUIPlugin'
 import MessageEmojiReact from './message-emoji-react.vue'
 import TIM from '../../../../TUICore/tim/index'
+import infos from '../../../../../components/infos.vue'
 
 const messageBubble = defineComponent({
   props: {
@@ -138,7 +146,8 @@ const messageBubble = defineComponent({
   emits: ['jumpID', 'resendMessage', 'showReadReceiptDialog', 'showRepliesDialog', 'dropDownOpen'],
   components: {
     MessageReference,
-    MessageEmojiReact
+    MessageEmojiReact,
+    infos
   },
   setup(props: any, ctx: any) {
     const { t } = (window as any).TUIKitTUICore.config.i18n.useI18n()
@@ -399,16 +408,22 @@ const messageBubble = defineComponent({
         return false
       }
     }
-
+    const open = ref(false)
+    const infosRef = ref(<any>{})
     const change = (message: Message) => {
       if (message.flow === 'in') {
-        console.log(message.from)
+        open.value = true
+        nextTick(() => {
+          infosRef.value.open({ userID: message.from })
+        })
       }
     }
 
     return {
       ...toRefs(data),
       toggleDialog,
+      open,
+      infosRef,
       htmlRefHook,
       jumpToAim,
       dropdown,
