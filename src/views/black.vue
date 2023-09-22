@@ -1,37 +1,33 @@
 <template>
-  <div class="app">
-    <Menu />
-    <div class="home-TUIKit-main">
-      <div class="conversation">
-        <div class="search flex items-center justify-between p-2">
-          <a-input class="input" @pressEnter="change" v-model:value="search" placeholder="搜索" />
-          <div class="icon ml-2 text-5" @click="router.push('/friend')">
-            <i class="iconfont icon-icon-test59"></i>
-          </div>
+  <div class="home-TUIKit-main">
+    <div class="conversation">
+      <div class="search flex items-center justify-between p-2">
+        <a-input class="input" @pressEnter="change" v-model:value="search" placeholder="搜索" />
+        <div class="icon ml-2 text-5" @click="router.push('/friend')">
+          <i class="iconfont icon-icon-test59"></i>
         </div>
-        <div
-          v-for="(item, index) in list"
-          :key="index"
-          class="flex items-center item"
-          :class="{ active: active === index }"
-          @click="routePage(item, index)"
-        >
-          <a-avatar shape="square" :src="item.avatar" :size="40" />
-          <div class="pl-2 text-14px" v-html="titleFn(item.nick)"></div>
-        </div>
-        <a-empty description="暂无数据" :image="simpleImage" class="pt-10" v-if="!list.length">
-        </a-empty>
       </div>
-      <div class="chat">
-        <infoscn ref="infoRef" />
-        <i class="iconfont icon-icon-test37" v-if="!infos"></i>
+      <div
+        v-for="(item, index) in list"
+        :key="index"
+        class="flex items-center item"
+        :class="{ active: active === index }"
+        @click="routePage(item, index)"
+      >
+        <a-avatar shape="square" :src="item.avatar" :size="40" />
+        <div class="pl-2 text-14px" v-html="titleFn(item.nick)"></div>
       </div>
+      <a-empty description="暂无数据" :image="simpleImage" class="pt-10" v-if="!list.length">
+      </a-empty>
+    </div>
+    <div class="chat">
+      <infoscn ref="infoRef" />
+      <i class="iconfont icon-icon-test37" v-if="!infos"></i>
     </div>
   </div>
 </template>
 
 <script setup>
-import Menu from '@/components/menu.vue'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { Empty } from 'ant-design-vue'

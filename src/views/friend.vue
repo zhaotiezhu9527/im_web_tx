@@ -1,52 +1,48 @@
 <template>
-  <div class="app">
-    <Menu />
-    <div class="home-TUIKit-main">
-      <div class="conversation">
-        <div class="search flex items-center justify-between p-2">
-          <a-input class="input" @pressEnter="change" v-model:value="search" placeholder="搜索" />
-          <div class="icon ml-2 text-5" @click="router.push('/add')">+</div>
-        </div>
-        <div class="flex items-center item" @click="router.push('/newfriend')">
-          <a-badge :count="count">
-            <div class="font-icon">
-              <i class="iconfont icon-tianjiahaoyou text-30px"></i>
-            </div>
-          </a-badge>
-          <div class="pl-2 text-14px">新的朋友</div>
-        </div>
-        <div class="flex items-center item" @click="router.push('/black?type=black')">
+  <div class="home-TUIKit-main">
+    <div class="conversation">
+      <div class="search flex items-center justify-between p-2">
+        <a-input class="input" @pressEnter="change" v-model:value="search" placeholder="搜索" />
+        <div class="icon ml-2 text-5" @click="router.push('/add')">+</div>
+      </div>
+      <div class="flex items-center item" @click="router.push('/newfriend')">
+        <a-badge :count="count">
           <div class="font-icon">
-            <i class="iconfont icon-jurassic_user text-20px"></i>
+            <i class="iconfont icon-tianjiahaoyou text-30px"></i>
           </div>
-          <div class="pl-2 text-14px">黑名单</div>
-        </div>
-        <div v-for="(item, index) in list" :key="index">
-          <div class="title">{{ item.en }}</div>
-          <div
-            v-for="(vim, ix) in item.list"
-            :key="ix"
-            class="flex items-center item"
-            :class="{ active: active === vim.userID }"
-            @click="routePage(vim)"
-          >
-            <a-avatar shape="square" :src="vim.profile?.avatar" :size="40" />
-            <div class="pl-2 text-14px" v-html="titleFn(vim.remark || vim.profile.nick)"></div>
-          </div>
-        </div>
-        <a-empty description="暂无数据" :image="simpleImage" class="pt-10" v-if="!list.length">
-        </a-empty>
+        </a-badge>
+        <div class="pl-2 text-14px">新的朋友</div>
       </div>
-      <div class="chat">
-        <infoscn ref="infoRef" @ok="dataFn" />
-        <i class="iconfont icon-icon-test37" v-if="!infos"></i>
+      <div class="flex items-center item" @click="router.push('/black?type=black')">
+        <div class="font-icon">
+          <i class="iconfont icon-jurassic_user text-20px"></i>
+        </div>
+        <div class="pl-2 text-14px">黑名单</div>
       </div>
+      <div v-for="(item, index) in list" :key="index">
+        <div class="title">{{ item.en }}</div>
+        <div
+          v-for="(vim, ix) in item.list"
+          :key="ix"
+          class="flex items-center item"
+          :class="{ active: active === vim.userID }"
+          @click="routePage(vim)"
+        >
+          <a-avatar shape="square" :src="vim.profile?.avatar" :size="40" />
+          <div class="pl-2 text-14px" v-html="titleFn(vim.remark || vim.profile.nick)"></div>
+        </div>
+      </div>
+      <a-empty description="暂无数据" :image="simpleImage" class="pt-10" v-if="!list.length">
+      </a-empty>
+    </div>
+    <div class="chat">
+      <infoscn ref="infoRef" @ok="dataFn" />
+      <i class="iconfont icon-icon-test37" v-if="!infos"></i>
     </div>
   </div>
 </template>
 
 <script setup>
-import Menu from '@/components/menu.vue'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { Empty } from 'ant-design-vue'

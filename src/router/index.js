@@ -10,14 +10,46 @@ import { message } from 'ant-design-vue'
 
 const routes = [
   {
+    name: 'layout',
     path: '/',
-    name: 'index',
-    component: () => import('@/views/index.vue')
-  },
-  {
-    path: '/password',
-    name: 'password',
-    component: () => import('@/views/password.vue')
+    component: () => import('@/components/menu.vue'),
+    children: [
+      {
+        path: '/',
+        name: 'index',
+        component: () => import('@/views/index.vue')
+      },
+      {
+        path: '/password',
+        name: 'password',
+        component: () => import('@/views/password.vue')
+      },
+      {
+        path: '/user',
+        name: 'user',
+        component: () => import('@/views/user.vue')
+      },
+      {
+        path: '/friend',
+        name: 'friend',
+        component: () => import('@/views/friend.vue')
+      },
+      {
+        path: '/add',
+        name: 'add',
+        component: () => import('@/views/add.vue')
+      },
+      {
+        path: '/newfriend',
+        name: 'newfriend',
+        component: () => import('@/views/newfriend.vue')
+      },
+      {
+        path: '/black',
+        name: 'black',
+        component: () => import('@/views/black.vue')
+      }
+    ]
   },
   {
     path: '/login',
@@ -28,31 +60,6 @@ const routes = [
     path: '/register',
     name: 'register',
     component: () => import('@/views/register.vue')
-  },
-  {
-    path: '/user',
-    name: 'user',
-    component: () => import('@/views/user.vue')
-  },
-  {
-    path: '/friend',
-    name: 'friend',
-    component: () => import('@/views/friend.vue')
-  },
-  {
-    path: '/add',
-    name: 'add',
-    component: () => import('@/views/add.vue')
-  },
-  {
-    path: '/newfriend',
-    name: 'newfriend',
-    component: () => import('@/views/newfriend.vue')
-  },
-  {
-    path: '/black',
-    name: 'black',
-    component: () => import('@/views/black.vue')
   }
 ]
 

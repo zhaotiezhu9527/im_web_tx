@@ -1,48 +1,44 @@
 <template>
-  <div class="app">
-    <Menu />
-    <div class="home-TUIKit-main">
-      <div class="conversation">
-        <div
-          v-for="(item, index) in list"
-          :key="index"
-          class="flex items-center item"
-          :class="{ active: active === item.conversationID }"
-          @click="routePage(item)"
-          @contextmenu.prevent.stop="rightChange($event, item)"
-        >
-          <a-badge :count="item.unreadCount">
-            <a-avatar shape="square" :src="item?.userProfile?.avatar" :size="40" />
-          </a-badge>
-          <div class="pl-2">
-            <div class="text-14px">{{ item.remark || item?.userProfile?.nick }}</div>
-            <div class="text-12px pt-1 c-gray messageForShow">
-              {{ item?.lastMessage?.messageForShow }}
-            </div>
+  <div class="home-TUIKit-main">
+    <div class="conversation">
+      <div
+        v-for="(item, index) in list"
+        :key="index"
+        class="flex items-center item"
+        :class="{ active: active === item.conversationID }"
+        @click="routePage(item)"
+        @contextmenu.prevent.stop="rightChange($event, item)"
+      >
+        <a-badge :count="item.unreadCount">
+          <a-avatar shape="square" :src="item?.userProfile?.avatar" :size="40" />
+        </a-badge>
+        <div class="pl-2">
+          <div class="text-14px">{{ item.remark || item?.userProfile?.nick }}</div>
+          <div class="text-12px pt-1 c-gray messageForShow">
+            {{ item?.lastMessage?.messageForShow }}
           </div>
-          <p class="time" v-if="item?.lastMessage?.lastTime">
-            {{ timeFrom(item?.lastMessage?.lastTime) }}
-          </p>
         </div>
-        <a-empty description="暂无数据" :image="simpleImage" class="pt-10" v-if="!list.length">
-        </a-empty>
+        <p class="time" v-if="item?.lastMessage?.lastTime">
+          {{ timeFrom(item?.lastMessage?.lastTime) }}
+        </p>
       </div>
-      <div class="chat">
-        <TUIChat ref="chatRef">
-          <div class="content flex justify-center items-center">
-            <i class="iconfont icon-icon-test3"></i>
-          </div>
-        </TUIChat>
-      </div>
+      <a-empty description="暂无数据" :image="simpleImage" class="pt-10" v-if="!list.length">
+      </a-empty>
     </div>
-    <context-menu v-model:show="show" :options="options">
-      <context-menu-item label="删除聊天" @click="onMenuClick" />
-    </context-menu>
+    <div class="chat">
+      <TUIChat ref="chatRef">
+        <div class="content flex justify-center items-center">
+          <i class="iconfont icon-icon-test3"></i>
+        </div>
+      </TUIChat>
+    </div>
   </div>
+  <context-menu v-model:show="show" :options="options">
+    <context-menu-item label="删除聊天" @click="onMenuClick" />
+  </context-menu>
 </template>
 
 <script setup>
-import Menu from '@/components/menu.vue'
 import { Empty } from 'ant-design-vue'
 const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE
 import { ref, onMounted } from 'vue'

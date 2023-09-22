@@ -1,38 +1,29 @@
 <template>
-  <div class="app">
-    <Menu />
-    <div class="home-TUIKit-main">
-      <div class="conversation">
-        <div class="search flex items-center justify-between p-2">
-          <a-input
-            class="input"
-            @pressEnter="change"
-            v-model:value="search"
-            placeholder="添加好友"
-          />
-          <div class="icon ml-2" @click="router.push('/friend')">取消</div>
-        </div>
-        <div
-          v-for="(item, index) in list"
-          :key="index"
-          class="flex items-center item"
-          @click="routePage(item)"
-        >
-          <a-avatar shape="square" :src="item.avatar" :size="40" />
-          <div class="pl-2 text-14px">{{ item.nick }}</div>
-        </div>
-        <a-empty description="暂无数据" :image="simpleImage" class="pt-10" v-if="!list.length">
-        </a-empty>
+  <div class="home-TUIKit-main">
+    <div class="conversation">
+      <div class="search flex items-center justify-between p-2">
+        <a-input class="input" @pressEnter="change" v-model:value="search" placeholder="添加好友" />
+        <div class="icon ml-2" @click="router.push('/friend')">取消</div>
       </div>
-      <div class="chat">
-        <infoscn ref="infoRef" />
+      <div
+        v-for="(item, index) in list"
+        :key="index"
+        class="flex items-center item"
+        @click="routePage(item)"
+      >
+        <a-avatar shape="square" :src="item.avatar" :size="40" />
+        <div class="pl-2 text-14px">{{ item.nick }}</div>
       </div>
+      <a-empty description="暂无数据" :image="simpleImage" class="pt-10" v-if="!list.length">
+      </a-empty>
+    </div>
+    <div class="chat">
+      <infoscn ref="infoRef" />
     </div>
   </div>
 </template>
 
 <script setup>
-import Menu from '@/components/menu.vue'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import Cookies from 'js-cookie'
