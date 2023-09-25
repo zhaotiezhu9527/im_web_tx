@@ -130,7 +130,6 @@ watch(
   () => route,
   (newVal) => {
     path.value = newVal.path
-    console.log(newVal.path)
   },
   {
     deep: true,

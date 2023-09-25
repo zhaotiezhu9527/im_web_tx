@@ -67,7 +67,6 @@ const form = ref({
   remark: '' // 备注
 })
 function open(val) {
-  console.log(val)
   infos.value = val
   show.value = true
   window.$chat
