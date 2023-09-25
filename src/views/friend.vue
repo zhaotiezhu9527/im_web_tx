@@ -60,6 +60,7 @@ onMounted(() => {
   align-items: center;
   border-bottom: 1px solid #e8e8e8;
   position: sticky;
+  z-index: 10;
   top: 0;
 }
 .chat {
