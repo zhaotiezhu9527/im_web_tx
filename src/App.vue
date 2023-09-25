@@ -89,4 +89,22 @@ body {
     }
   }
 }
+.searchModel {
+  .ant-modal-content {
+    width: 630px;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    .header {
+      padding: 16px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .content {
+      padding: 24px;
+      min-height: 400px;
+    }
+  }
+}
 </style>

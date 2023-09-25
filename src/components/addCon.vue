@@ -50,6 +50,7 @@ function cancel() {
     name: '',
     textarea: ''
   }
+  show.value = false
 }
 function sbumit() {
   let is_ok = window.$tx.TYPES.ALLOW_TYPE_ALLOW_ANY === items.value.allowType
@@ -75,14 +76,12 @@ function sbumit() {
       cancel()
     })
     .catch((error) => {
-      window.$message.error(error.message)
+      if (error.message === 'The specified userID is my friend already') {
+        window.$message.info('该用户已经是你的好友了！')
+      } else {
+        window.$message.error(error.message)
+      }
     })
-  // 关闭添加好友对话框
-  function cancel() {
-    form.value.name = ''
-    form.value.textarea = ''
-    show.value = false
-  }
 }
 defineExpose({ open })
 </script>

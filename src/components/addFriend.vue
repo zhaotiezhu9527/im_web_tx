@@ -9,7 +9,11 @@
       :mask="false"
     >
       <div class="pt-3">
-        <a-input class="input" v-model:value="search" placeholder="请输入账号" />
+        <a-input class="input" v-model:value="search" placeholder="请输入账号">
+          <template #prefix>
+            <i class="iconfont icon-icon-test12"></i>
+          </template>
+        </a-input>
       </div>
       <div
         v-for="(item, index) in list"
@@ -30,6 +34,7 @@
           添加
         </a-button>
       </div>
+      <div class="text-red" v-if="len">查无此账号</div>
       <template #footer>
         <div class="pt-20px">
           <a-button class="button" size="middle" @click="cancel"> 取消 </a-button>
@@ -50,6 +55,7 @@ import addCon from '@/components/addCon.vue'
 const show = ref(false)
 const list = ref([])
 const search = ref('')
+const len = ref(false)
 function open() {
   show.value = true
 }
@@ -73,7 +79,7 @@ function dataFn() {
     .getUserProfile({ userIDList: [search.value] })
     .then(({ data }) => {
       list.value = data
-      // infoscnRef.value.open(infos.value)
+      len.value = !data.length
     })
     .catch((imError) => {
       window.$message.error(imError.message)

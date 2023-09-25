@@ -6,7 +6,17 @@
 </template>
 
 <script lang="ts">
-import { ref, defineComponent, watchEffect, watch, reactive, toRefs, computed, nextTick } from 'vue'
+import {
+  ref,
+  defineComponent,
+  watchEffect,
+  watch,
+  reactive,
+  toRefs,
+  computed,
+  nextTick,
+  onUnmounted
+} from 'vue'
 import { handleName, JSONToObject, isTypingMessage } from '../../utils/utils'
 import constant from '../../../constant'
 import { useToken } from '@/store'
@@ -83,14 +93,23 @@ const TypingHeader = defineComponent({
       }
       return conversationName?.value
     })
-
     const is_status = ref('')
-    if (data.conversation?.userProfile?.userID) {
-      window.$chat
-        .getUserStatus({ userIDList: [data.conversation?.userProfile?.userID] })
-        .then((event) => dataFn(event.data.successUserList))
-      window.$chat.on(window.$tx.EVENT.USER_STATUS_UPDATED, (event) => dataFn(event.data))
+    onUnmounted(() => {
+      clearInterval(time)
+    })
+    // 测试
+    let time: any = null
+    time = setInterval(() => is_status_Fn(), 10000)
+    is_status_Fn()
+    function is_status_Fn() {
+      if (data.conversation?.userProfile?.userID) {
+        window.$chat
+          .getUserStatus({ userIDList: [data.conversation?.userProfile?.userID] })
+          .then((event) => dataFn(event.data.successUserList))
+        window.$chat.on(window.$tx.EVENT.USER_STATUS_UPDATED, (event) => dataFn(event.data))
+      }
     }
+
     function dataFn(list) {
       let that = list.find((item) => item.userID === data.conversation?.userProfile?.userID)
       if (that.statusType === window.$tx.TYPES.USER_STATUS_UNKNOWN) {

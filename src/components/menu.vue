@@ -1,7 +1,7 @@
 <template>
   <div class="app">
     <div class="search">
-      <div class="button">
+      <div class="button" @click="searchConRef.open()">
         <i class="iconfont icon-icon-test12 mr-1"></i>
         搜索好友
       </div>
@@ -54,6 +54,7 @@
     <pwd ref="pwdRef" />
     <userCon ref="userConRef" />
     <addFriend ref="addFriendRef" />
+    <searchCon ref="searchConRef" />
   </div>
 </template>
 <script setup>
@@ -63,12 +64,14 @@ import { ref, watch } from 'vue'
 import pwd from '@/components/pwd.vue'
 import userCon from '@/components/userCon.vue'
 import addFriend from '@/components/addFriend.vue'
+import searchCon from '@/components/searchCon.vue'
 const items = ref({
   message: 0, //会话未读总数
   count: 0 // 好友申请未读数量
 })
 const userConRef = ref({})
 const addFriendRef = ref({})
+const searchConRef = ref({})
 // 监听会话未读总数
 window.$chat.on(window.$tx.EVENT.TOTAL_UNREAD_MESSAGE_COUNT_UPDATED, ({ data }) => {
   items.value.message = data
@@ -147,6 +150,7 @@ watch(
     padding: 8px 0;
     display: flex;
     flex-direction: row;
+    border-radius: 4px;
     justify-content: center;
     align-items: center;
     font-size: 14px;
@@ -161,7 +165,7 @@ watch(
     color: #b3b7bc;
     background: #f1f5f8;
     border-radius: 4px;
-    margin-left: 20px;
+    margin-left: 10px;
     cursor: pointer;
     font-size: 20px;
     display: flex;

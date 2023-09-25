@@ -89,12 +89,7 @@
     <i class="icon icon-msg-replies"></i>
     <span>{{ replies?.length + $t('TUIChat.条回复') }}</span>
   </label>
-  <a-modal v-model:open="open" title="" style="width: 440px" centered>
-    <div class="p-10">
-      <infos ref="infosRef" @ok="open = false" />
-    </div>
-    <template #footer> </template>
-  </a-modal>
+  <infos ref="infosRef" @ok="open = false" />
 </template>
 
 <script lang="ts">

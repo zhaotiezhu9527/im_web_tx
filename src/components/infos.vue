@@ -234,6 +234,7 @@ const router = useRouter()
 // 聊天
 function service() {
   router.push(`/?c=${items.value.userID}`)
+  form.value.show = false
   emit('ok')
 }
 // 加入移除黑名单
