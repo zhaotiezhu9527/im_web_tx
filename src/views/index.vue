@@ -109,11 +109,11 @@ function dataFn() {
         .getUserStatus({ userIDList: uid })
         .then((event) => listFn(event.data.successUserList))
       window.$chat.on(window.$tx.EVENT.USER_STATUS_UPDATED, (event) => listFn(event.data))
-      // time = setInterval(() => {
-      window.$chat
-        .getUserStatus({ userIDList: uid })
-        .then((event) => listFn(event.data.successUserList))
-      // }, 10000)
+      time = setInterval(() => {
+        window.$chat
+          .getUserStatus({ userIDList: uid })
+          .then((event) => listFn(event.data.successUserList))
+      }, 10000)
     }
   })
 }
