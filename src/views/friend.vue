@@ -59,12 +59,16 @@ onMounted(() => {
   background-color: #f6f8fa;
   align-items: center;
   border-bottom: 1px solid #e8e8e8;
+  position: sticky;
+  top: 0;
 }
 .chat {
   height: 100%;
   position: relative;
   background-color: #f6f8fa;
   width: calc(100% - 250px);
+  overflow-x: 0;
+  overflow-y: auto;
   .iconfont {
     font-size: 200px;
     color: #eee;

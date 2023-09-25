@@ -62,6 +62,8 @@ function routePage(vim) {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  overflow-x: 0;
+  overflow-y: auto;
   width: 760px;
   .iconfont {
     font-size: 200px;

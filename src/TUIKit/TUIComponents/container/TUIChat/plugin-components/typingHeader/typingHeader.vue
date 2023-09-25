@@ -1,7 +1,7 @@
 <template>
   <h1>
-    {{ title === '对方正在输入' ? $t('TUIChat.对方正在输入') : title
-    }}<span v-if="is_status || !is_status">（{{ is_status }}）</span>
+    {{ title === '对方正在输入' ? $t('TUIChat.对方正在输入') : title }}
+    <!-- <span v-if="is_status || !is_status">（{{ is_status }}）</span> -->
   </h1>
 </template>
 
@@ -94,40 +94,40 @@ const TypingHeader = defineComponent({
       }
       return conversationName?.value
     })
-    const is_status = ref('')
-    onUnmounted(() => {
-      clearInterval(time)
-      time = null
-    })
-    onBeforeUnmount(() => {
-      clearInterval(time)
-      time = null
-    })
+    // const is_status = ref('')
+    // onUnmounted(() => {
+    //   clearInterval(time)
+    //   time = null
+    // })
+    // onBeforeUnmount(() => {
+    //   clearInterval(time)
+    //   time = null
+    // })
     // 测试
-    let time: any = null
-    time = setInterval(() => is_status_Fn(), 1000)
-    is_status_Fn()
-    function is_status_Fn() {
-      if (data.conversation?.userProfile?.userID) {
-        window.$chat
-          .getUserStatus({ userIDList: [data.conversation?.userProfile?.userID] })
-          .then((event) => dataFn(event.data.successUserList))
-        window.$chat.on(window.$tx.EVENT.USER_STATUS_UPDATED, (event) => dataFn(event.data))
-      }
-    }
+    // let time: any = null
+    // time = setInterval(() => is_status_Fn(), 1000)
+    // is_status_Fn()
+    // function is_status_Fn() {
+    //   if (data.conversation?.userProfile?.userID) {
+    //     window.$chat
+    //       .getUserStatus({ userIDList: [data.conversation?.userProfile?.userID] })
+    //       .then((event) => dataFn(event.data.successUserList))
+    //     window.$chat.on(window.$tx.EVENT.USER_STATUS_UPDATED, (event) => dataFn(event.data))
+    //   }
+    // }
 
-    function dataFn(list) {
-      let that = list.find((item) => item.userID === data.conversation?.userProfile?.userID)
-      if (that.statusType === window.$tx.TYPES.USER_STATUS_UNKNOWN) {
-        is_status.value = '未知'
-      } else if (that.statusType === window.$tx.TYPES.USER_STATUS_ONLINE) {
-        is_status.value = '在线'
-      } else if (that.statusType === window.$tx.TYPES.USER_STATUS_OFFLINE) {
-        is_status.value = '离线'
-      } else if (that.statusType === window.$tx.TYPES.USER_STATUS_UNLOGINED) {
-        is_status.value = '未登录'
-      }
-    }
+    // function dataFn(list) {
+    //   let that = list.find((item) => item.userID === data.conversation?.userProfile?.userID)
+    //   if (that.statusType === window.$tx.TYPES.USER_STATUS_UNKNOWN) {
+    //     is_status.value = '未知'
+    //   } else if (that.statusType === window.$tx.TYPES.USER_STATUS_ONLINE) {
+    //     is_status.value = '在线'
+    //   } else if (that.statusType === window.$tx.TYPES.USER_STATUS_OFFLINE) {
+    //     is_status.value = '离线'
+    //   } else if (that.statusType === window.$tx.TYPES.USER_STATUS_UNLOGINED) {
+    //     is_status.value = '未登录'
+    //   }
+    // }
 
     const onTyping = (inputContentEmpty: boolean, inputBlur: boolean) => {
       if (!data.needTyping || conversationType.value !== 'C2C') return
@@ -240,7 +240,7 @@ const TypingHeader = defineComponent({
 
     return {
       ...toRefs(data),
-      is_status,
+      // is_status,
       conversationID,
       conversationName,
       conversationType,

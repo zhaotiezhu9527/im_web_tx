@@ -11,10 +11,7 @@
       >
         <a-badge class="relative" :count="item.unreadCount">
           <a-avatar shape="square" :src="item?.userProfile?.avatar" :size="40" />
-          <div
-            class="status"
-            :class="{ lx: item.statusType === '离线', zx: item.statusType === '在线' }"
-          ></div>
+          <div class="status" :class="{ zx: item.statusType === '在线' }"></div>
         </a-badge>
         <div class="pl-2">
           <div class="text-14px">{{ item.remark || item?.userProfile?.nick }}</div>
@@ -258,9 +255,6 @@ function onMenuClick() {
   border-radius: 50%;
   width: 10px;
   height: 10px;
-  &.lx {
-    background-color: #666;
-  }
   &.zx {
     background-color: #95ec69;
   }
