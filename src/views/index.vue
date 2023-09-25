@@ -1,5 +1,5 @@
 <template>
-  <div class="home-TUIKit-main">
+  <div class="home-main">
     <div class="conversation">
       <div
         v-for="(item, index) in list"
@@ -28,7 +28,7 @@
     <div class="chat">
       <TUIChat ref="chatRef">
         <div class="content flex justify-center items-center">
-          <i class="iconfont icon-icon-test3"></i>
+          <img src="@/assets/img2.png" />
         </div>
       </TUIChat>
     </div>
@@ -41,11 +41,12 @@
 <script setup>
 import { Empty } from 'ant-design-vue'
 const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import 'dayjs/locale/zh-cn'
+import { useToken } from '@/store'
 dayjs.locale('zh-cn')
 dayjs.extend(relativeTime)
 const list = ref([])
@@ -57,11 +58,11 @@ onMounted(() => {
     active.value = 'C2C' + route.query.c
     window.$chat.getConversationProfile('C2C' + route.query.c).then((imResponse) => {
       if (imResponse.data.conversation) {
+        chatRef.value.conversation = imResponse.data.conversation
         let TUIServer = window.TUIKitTUICore.TUIServer
         TUIServer.TUISearch.TUICore.TUIServer.TUIConversation.handleCurrentConversation(
           imResponse.data.conversation
         )
-        chatRef.value.conversation = imResponse.data.conversation
       }
     })
   }
@@ -75,6 +76,14 @@ onMounted(() => {
   //消息回应更新通知
   window.$chat.on(window.$tx.EVENT.MESSAGE_REACTIONS_UPDATED, () => dataFn())
 })
+let usetoken = useToken()
+watch(
+  () => usetoken.remark,
+  () => dataFn(),
+  {
+    deep: true
+  }
+)
 function timeFrom(val) {
   return dayjs(val * 1000).fromNow()
 }
@@ -82,17 +91,22 @@ function timeFrom(val) {
 function dataFn() {
   window.$chat.getConversationList().then(({ data }) => {
     list.value = data.conversationList
+    let uid = list.value.map((item) => item.userProfile?.userID)
+    if (uid.length) {
+      window.$chat.getUserStatus({ userIDList: uid }).then((event) => {})
+      window.$chat.on(window.$tx.EVENT.USER_STATUS_UPDATED, (event) => {})
+    }
   })
 }
 function routePage(item) {
   active.value = item.conversationID
   window.$chat.getConversationProfile(item.conversationID).then((imResponse) => {
     if (imResponse.data.conversation) {
+      chatRef.value.conversation = imResponse.data.conversation
       let TUIServer = window.TUIKitTUICore.TUIServer
       TUIServer.TUISearch.TUICore.TUIServer.TUIConversation.handleCurrentConversation(
         imResponse.data.conversation
       )
-      chatRef.value.conversation = imResponse.data.conversation
     }
   })
 }
@@ -119,48 +133,31 @@ function onMenuClick() {
 }
 </script>
 <style lang="scss" scoped>
-.home-TUIKit-main {
-  display: flex;
-  height: 100%;
-}
-.conversation {
-  width: 285px;
-  flex: 0 0 24%;
-  height: 100%;
-  border-right: 1px solid #f4f5f9;
-  overflow-x: hidden;
-  overflow-y: auto;
-  padding-top: 10px;
-}
 .chat {
   flex: 1;
   position: relative;
   height: 100%;
-  width: 760px;
+  width: calc(100% - 250px);
   .content {
-    width: 760px;
+    width: 100%;
     height: 100%;
-    .iconfont {
-      font-size: 200px;
-      color: #eee;
-    }
   }
 }
 .item {
   width: 100%;
-  padding: 6px 10px;
+  padding: 12px;
   cursor: pointer;
   position: relative;
   .time {
     position: absolute;
-    top: 10px;
+    top: 12px;
     right: 10px;
     font-size: 12px;
     color: #999;
   }
   &.active,
   &:hover {
-    background-color: #ebebeb;
+    background-color: #ebf3fc;
   }
 
   &:nth-child(2) {

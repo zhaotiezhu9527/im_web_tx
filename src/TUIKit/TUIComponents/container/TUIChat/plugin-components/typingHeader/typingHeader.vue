@@ -1,25 +1,29 @@
 <template>
-  <h1>{{ title === '对方正在输入' ? $t('TUIChat.对方正在输入') : title }}</h1>
+  <h1>
+    {{ title === '对方正在输入' ? $t('TUIChat.对方正在输入') : title
+    }}<span v-if="is_status || !is_status">（{{ is_status }}）</span>
+  </h1>
 </template>
 
 <script lang="ts">
-import { defineComponent, watchEffect, watch, reactive, toRefs, computed, nextTick } from 'vue';
-import { handleName, JSONToObject, isTypingMessage } from '../../utils/utils';
-import constant from '../../../constant';
+import { ref, defineComponent, watchEffect, watch, reactive, toRefs, computed, nextTick } from 'vue'
+import { handleName, JSONToObject, isTypingMessage } from '../../utils/utils'
+import constant from '../../../constant'
+import { useToken } from '@/store'
 const TypingHeader = defineComponent({
   props: {
     needTyping: {
       type: Boolean,
-      default: false,
+      default: false
     },
     conversation: {
       type: Object,
-      default: () => ({}),
+      default: () => ({})
     },
     messageList: {
       type: Array,
-      default: () => [],
-    },
+      default: () => []
+    }
   },
   setup(props: any, ctx: any) {
     const data = reactive({
@@ -39,109 +43,137 @@ const TypingHeader = defineComponent({
           typingStatus: 0,
           version: 1,
           userAction: 0,
-          actionParam: constant.typeInputStatusEnd,
+          actionParam: constant.typeInputStatusEnd
         },
         description: '',
-        extension: '',
-      },
-    });
+        extension: ''
+      }
+    })
 
     watchEffect(() => {
-      data.messageList = props.messageList;
-      data.conversation = props.conversation;
-      data.needTyping = props.needTyping;
-    });
+      data.messageList = props.messageList
+      data.conversation = props.conversation
+      data.needTyping = props.needTyping
+    })
     const conversationID = computed(() => {
-      const { conversation }: any = data;
-      return conversation?.conversationID ? conversation.conversationID : '';
-    });
-    const conversationName = computed(() => {
-      const { conversation }: any = data;
-      return handleName(conversation);
-    });
+      const { conversation }: any = data
+      return conversation?.conversationID ? conversation.conversationID : ''
+    })
+    const { conversation }: any = data
+    const conversationName = ref(conversation?.remark || conversation?.userProfile?.nick)
+
+    let usetoken = useToken()
+    watch(
+      () => usetoken.remark,
+      (newVal) => {
+        conversationName.value = newVal
+      },
+      {
+        deep: true
+      }
+    )
     const conversationType = computed(() => {
-      const { conversation }: any = data;
-      return conversation?.type ? conversation?.type : '';
-    });
+      const { conversation }: any = data
+      return conversation?.type ? conversation?.type : ''
+    })
 
     const title = computed(() => {
       if (data.needTyping && data.otherTypingStatus) {
-        return '对方正在输入';
+        return '对方正在输入'
       }
-      return conversationName?.value;
-    });
+      return conversationName?.value
+    })
 
+    const is_status = ref('')
+    if (data.conversation?.userProfile?.userID) {
+      window.$chat
+        .getUserStatus({ userIDList: [data.conversation?.userProfile?.userID] })
+        .then((event) => dataFn(event.data.successUserList))
+      window.$chat.on(window.$tx.EVENT.USER_STATUS_UPDATED, (event) => dataFn(event.data))
+    }
+    function dataFn(list) {
+      let that = list.find((item) => item.userID === data.conversation?.userProfile?.userID)
+      if (that.statusType === window.$tx.TYPES.USER_STATUS_UNKNOWN) {
+        is_status.value = '未知'
+      } else if (that.statusType === window.$tx.TYPES.USER_STATUS_ONLINE) {
+        is_status.value = '在线'
+      } else if (that.statusType === window.$tx.TYPES.USER_STATUS_OFFLINE) {
+        is_status.value = '离线'
+      } else if (that.statusType === window.$tx.TYPES.USER_STATUS_UNLOGINED) {
+        is_status.value = '未登录'
+      }
+    }
 
     const onTyping = (inputContentEmpty: boolean, inputBlur: boolean) => {
-      if (!data.needTyping || conversationType.value !== 'C2C') return;
+      if (!data.needTyping || conversationType.value !== 'C2C') return
       if (new Date().getTime() / 1000 - data.lastOtherMessageTime < 30) {
-        data.timeValid = 1;
+        data.timeValid = 1
       }
-      if (!data.timeValid) return;
+      if (!data.timeValid) return
       if (!inputContentEmpty && !inputBlur) {
-        data.myTypingStatus = 1;
-        const now = new Date().getTime();
+        data.myTypingStatus = 1
+        const now = new Date().getTime()
         if (now - data.lastMyTypingTime > 4000) {
-          data.lastMyTypingTime = now;
-          sendTypingMessage(data.myTypingStatus);
+          data.lastMyTypingTime = now
+          sendTypingMessage(data.myTypingStatus)
         }
       } else {
-        data.myTypingStatus = 0;
-        data.lastMyTypingTime = 0;
-        sendTypingMessage(data.myTypingStatus);
+        data.myTypingStatus = 0
+        data.lastMyTypingTime = 0
+        sendTypingMessage(data.myTypingStatus)
       }
-    };
+    }
 
     watch(conversationID, (newVal: any, oldVal: any) => {
-      if (newVal === oldVal) return;
-      data.needTyping = false;
-      data.timeValid = 0;
-    });
+      if (newVal === oldVal) return
+      data.needTyping = false
+      data.timeValid = 0
+    })
 
     watch(
       () => data.needTyping,
       (newVal: any, oldVal: any) => {
         if (!newVal) {
-          data.myTypingStatus = 0;
-          data.otherTypingStatus = 0;
-          data.lastOtherMessageTime = 0;
+          data.myTypingStatus = 0
+          data.otherTypingStatus = 0
+          data.lastOtherMessageTime = 0
         }
       }
-    );
+    )
 
     watch(
       () => data.messageList,
       (newVal: any, oldVal: any) => {
         nextTick(() => {
           if (newVal.length === 0 || conversationType.value !== 'C2C') {
-            return;
+            return
           }
-          data.lastOtherMessageTime = getLastOtherMessageTime(newVal);
+          data.lastOtherMessageTime = getLastOtherMessageTime(newVal)
           if (newVal[newVal.length - 1]?.flow === 'in') {
             if (!isTypingMessage(newVal[newVal.length - 1])) {
-              data.lastOtherMessageTime = newVal[newVal.length - 1]?.time;
-              data.otherTypingStatus = 0;
+              data.lastOtherMessageTime = newVal[newVal.length - 1]?.time
+              data.otherTypingStatus = 0
             } else {
-              data.otherTypingStatus = handleTypingMessageStatus(newVal[newVal.length - 1]);
-              waitTypingEnd();
+              data.otherTypingStatus = handleTypingMessageStatus(newVal[newVal.length - 1])
+              waitTypingEnd()
             }
           }
-        });
+        })
       },
       { deep: true }
-    );
+    )
 
     const handleTypingMessageStatus = (item: any) => {
       try {
-        const { typingStatus, actionParam }: any = JSONToObject(item?.payload?.data);
+        const { typingStatus, actionParam }: any = JSONToObject(item?.payload?.data)
         if (typingStatus === 1 && actionParam === constant.typeInputStatusIng) {
-          return 1;
+          return 1
         }
-        return 0;
+        return 0
       } catch {
-        return 0;
+        return 0
       }
-    };
+    }
 
     const sendTypingMessage = (isTyping: any) => {
       data.options = {
@@ -150,39 +182,40 @@ const TypingHeader = defineComponent({
           typingStatus: isTyping ? 1 : 0,
           version: 1,
           userAction: isTyping ? 14 : 0,
-          actionParam: isTyping ? constant.typeInputStatusIng : constant.typeInputStatusEnd,
+          actionParam: isTyping ? constant.typeInputStatusIng : constant.typeInputStatusEnd
         },
         description: '',
-        extension: '',
-      };
-      TypingHeader.TUIServer.sendTypingMessage(data.options);
-      return;
-    };
+        extension: ''
+      }
+      TypingHeader.TUIServer.sendTypingMessage(data.options)
+      return
+    }
 
     const getLastOtherMessageTime = (messageList: any) => {
-      if (!messageList) return 0;
+      if (!messageList) return 0
       for (let i = messageList.length - 1; i >= 0; i--) {
         if (!isTypingMessage(messageList[i]) && messageList[i].flow === 'in') {
-          return messageList[i].time;
+          return messageList[i].time
         }
       }
-      return 0;
-    };
+      return 0
+    }
 
     const debounce = (func: any, wait = 2000) => {
-      let timer: any;
+      let timer: any
       return function () {
-        if (timer) clearTimeout(timer);
-        timer = setTimeout(func, wait);
-      };
-    };
+        if (timer) clearTimeout(timer)
+        timer = setTimeout(func, wait)
+      }
+    }
 
     const waitTypingEnd = debounce(() => {
-      data.otherTypingStatus = 0;
-    }, 5000);
+      data.otherTypingStatus = 0
+    }, 5000)
 
     return {
       ...toRefs(data),
+      is_status,
       conversationID,
       conversationName,
       conversationType,
@@ -193,11 +226,11 @@ const TypingHeader = defineComponent({
       getLastOtherMessageTime,
       debounce,
       waitTypingEnd,
-      onTyping,
-    };
-  },
-});
-export default TypingHeader;
+      onTyping
+    }
+  }
+})
+export default TypingHeader
 </script>
 <style scoped>
 @import url('../../../../styles/common.scss');

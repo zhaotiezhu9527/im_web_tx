@@ -66,12 +66,16 @@ let usetoken = useToken()
 function userLogin() {
   formRef.value.validate().then(() => {
     window.$api.get_login(form.value).then((data) => {
-      usetoken.setToken(data.token)
-      usetoken.setUsersig(data.usersig)
-      Cookies.set('token', data.token)
-      Cookies.set('userID', form.value.userName)
-      Cookies.set('usersig', data.usersig)
-      window.location.href = '/'
+      if (data.code === '0') {
+        usetoken.setToken(data.token)
+        usetoken.setUsersig(data.usersig)
+        Cookies.set('token', data.token)
+        Cookies.set('userID', form.value.userName)
+        Cookies.set('usersig', data.usersig)
+        window.location.href = '/'
+      } else {
+        window.$message.error(data.msg)
+      }
     })
   })
 }
@@ -84,7 +88,6 @@ function userLogin() {
   background-color: #ffffff;
   border: 1px solid #ebedf0;
   box-shadow: 0px 2px 6px rgba(23, 23, 26, 0.1);
-  border-radius: 8px;
   padding: 74px 30px 80px;
   display: flex;
   flex-direction: column;
@@ -106,6 +109,6 @@ function userLogin() {
   padding-top: 10px;
 }
 .button {
-  border-radius: 2px !important;
+  border-radius: 0 !important;
 }
 </style>

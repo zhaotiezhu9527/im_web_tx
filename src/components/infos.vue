@@ -1,109 +1,109 @@
 <template>
-  <div v-if="items" class="rows">
-    <div class="flex items-center pb-4 border-bottom">
-      <a-avatar :size="70" :src="items.avatar" />
-      <div class="content pl-2">
-        <div class="text-14px pb-2">昵称：{{ infos.remark || items.nick }}</div>
-        <div class="text-14px">账号：{{ items.userID }}</div>
-      </div>
-    </div>
-    <div class="list">
-      <div class="item" v-if="form.relation === 'CheckResult_Type_BothWay'">
-        <span>备注：</span>
-        <div class="flex">
-          <a-input
-            class="mr-2"
-            v-model:value="form.remark"
-            placeholder="请输入备注"
-            v-if="form.show"
-            @pressEnter="input"
-          />
-          <div v-else :class="{ 'mr-2': infos.remark }">{{ infos.remark }}</div>
-          <i class="iconfont cursor-pointer icon-bianji" @click="showChange"></i>
+  <div>
+    <a-modal class="modalInfo" v-model:open="form.show" centered :closable="false" :mask="false">
+      <template #title>
+        <div class="header">
+          <div class="flex items-center border-bottom">
+            <a-avatar :size="70" :src="items.avatar" />
+            <div class="content pl-2">
+              <div class="text-14px text-white">{{ infos.remark || items.nick }}</div>
+            </div>
+          </div>
+          <a-tooltip placement="bottom" arrow-point-at-center color="#ffffff">
+            <template #title>
+              <div class="tooltip">
+                <div
+                  class="li"
+                  @click="addConRef.open(items)"
+                  v-if="form.relation === 'CheckResult_Type_NoRelation' && form.type !== 'black'"
+                >
+                  添加好友
+                </div>
+                <div
+                  class="li"
+                  @click="blackChange"
+                  v-if="form.relation === 'CheckResult_Type_BothWay' || form.type === 'black'"
+                >
+                  {{ form.black ? '解除' : '' }}拉黑
+                </div>
+                <div
+                  class="li"
+                  v-if="form.relation === 'CheckResult_Type_BothWay'"
+                  @click="delChange"
+                >
+                  删除好友
+                </div>
+              </div>
+            </template>
+            <i class="iconfont icon-sandian1"></i>
+          </a-tooltip>
+        </div>
+      </template>
+      <div class="rows">
+        <div class="list">
+          <div class="item" v-if="form.relation === 'CheckResult_Type_BothWay'">
+            <span>备注：</span>
+            <div class="flex">
+              <a-input
+                class="mr-2"
+                v-model:value="form.remark"
+                placeholder="请输入备注"
+                @blur="input"
+              />
+            </div>
+          </div>
+          <div class="item">
+            <span>账号：</span>
+            <div>{{ items.userID }}</div>
+          </div>
+          <div class="item">
+            <span>性别：</span>
+            <div>{{ genderFn() }}</div>
+          </div>
+          <div class="item">
+            <span>签名：</span>
+            <div>{{ items.selfSignature }}</div>
+          </div>
+          <div class="btn flex flex-col">
+            <a-button
+              class="my-3"
+              type="primary"
+              @click="service"
+              v-if="form.relation === 'CheckResult_Type_BothWay'"
+            >
+              聊天
+            </a-button>
+          </div>
         </div>
       </div>
-      <div class="item">
-        <span>性别：</span>
-        <div>{{ genderFn() }}</div>
-      </div>
-      <div class="item">
-        <span>个性签名：</span>
-        <div>{{ items.selfSignature }}</div>
-      </div>
-      <div class="btn flex flex-col">
-        <a-button
-          class="my-3"
-          type="primary"
-          @click="service"
-          v-if="form.relation === 'CheckResult_Type_BothWay'"
-        >
-          聊天
-        </a-button>
-        <a-button
-          class="my-3"
-          type="primary"
-          @click="form.open = true"
-          v-if="form.relation === 'CheckResult_Type_NoRelation' && form.type !== 'black'"
-        >
-          添加好友
-        </a-button>
-        <a-button
-          type="link"
-          @click="blackChange"
-          v-if="form.relation === 'CheckResult_Type_BothWay' || form.type === 'black'"
-        >
-          {{ form.black ? '移除' : '加入' }}黑名单
-        </a-button>
-        <a-button
-          class="my-3"
-          type="text"
-          color="red"
-          @click="delChange"
-          v-if="form.relation === 'CheckResult_Type_BothWay'"
-        >
-          删除
-        </a-button>
-      </div>
-    </div>
-    <a-modal v-model:open="form.open" title="添加好友" centered @cancel="cancel">
-      <div class="p-10">
-        <div class="pl-2 pb-1">备注：</div>
-        <a-input class="input" v-model:value="form.name" placeholder="请输入备注" />
-        <div class="pl-2 pt-5 pb-1">留言：</div>
-        <a-textarea
-          class="input"
-          v-model:value="form.textarea"
-          placeholder="请输入留言"
-          :rows="4"
-        />
-      </div>
-      <template #footer>
-        <a-button type="primary" @click="handleOk"> 确定 </a-button>
-      </template>
+      <template #footer></template>
     </a-modal>
+    <addCon ref="addConRef" />
   </div>
 </template>
 <script setup>
+import addCon from '@/components/addCon.vue'
 import { ref, createVNode } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import { Modal } from 'ant-design-vue'
-const route = useRoute()
-const router = useRouter()
+import { useToken } from '@/store'
+import { useRouter } from 'vue-router'
+const addConRef = ref({})
 const items = ref('')
 const infos = ref('')
 const form = ref({
   remark: '', // 备注
-  show: false, // 是否显示输入框
   relation: '', // 好友关系
   black: false, // 是否为黑名单
-  open: false,
+  show: false,
   name: '',
-  type: route?.query?.type,
+  type: '',
   textarea: ''
 })
-function open(val) {
+function open(val, type) {
+  form.value.show = true
   items.value = val
+  form.value.type = type
   dataFn()
   friendFn(val.userID)
   checkFriendFn()
@@ -122,7 +122,7 @@ function open(val) {
 }
 function genderFn() {
   let name = ''
-  switch (this.items.gender) {
+  switch (items.value.gender) {
     case 'Gender_Type_Male':
       name = '男'
       break
@@ -184,6 +184,7 @@ function checkFriendFn() {
       failureUserIDList.forEach(() => {})
     })
 }
+let usetoken = useToken()
 // 备注修改
 function input() {
   window.$chat
@@ -192,40 +193,8 @@ function input() {
       remark: form.value.remark
     })
     .then(() => {
+      usetoken.setRemark(form.value.remark)
       window.$message.success('修改成功！')
-      emit('ok')
-    })
-}
-function showChange() {
-  form.value.show = !form.value.show
-}
-// 添加好友
-function handleOk() {
-  let is_ok = window.$tx.TYPES.ALLOW_TYPE_ALLOW_ANY === items.value.allowType
-  // is_ok 为真则为双向添加，否则单向添加
-  window.$chat
-    .addFriend({
-      to: items.value.userID,
-      source: 'AddSource_Type_Web',
-      remark: form.value.name,
-      groupName: '好友',
-      wording: form.value.textarea,
-      type: is_ok ? window.$tx.TYPES.SNS_ADD_TYPE_BOTH : window.$tx.TYPES.SNS_ADD_TYPE_SINGLE // 单向添加
-    })
-    .then((imResponse) => {
-      // 添加好友的请求发送成功
-      const { code } = imResponse.data
-      if (code === 30539) {
-        window.$message.success('提交成功，等待对方验证！')
-      } else if (code === 0) {
-        window.$message.success('添加好友成功！')
-      }
-      emit('ok')
-      form.value.open = false
-      cancel()
-    })
-    .catch((error) => {
-      window.$message.error(error.message)
     })
 }
 // 删除好友
@@ -261,6 +230,7 @@ function deleteFn() {
       }
     })
 }
+const router = useRouter()
 // 聊天
 function service() {
   router.push(`/?c=${items.value.userID}`)
@@ -317,23 +287,13 @@ function addFriend() {
     })
 }
 
-// 关闭添加好友对话框
-function cancel() {
-  form.value.name = ''
-  form.value.textarea = ''
-}
 defineExpose({ open })
 </script>
 <style lang="scss" scoped>
 .rows {
-  width: 400px;
-  padding: 40px;
-  .border-bottom {
-    border-bottom: 1px solid #eee;
-  }
+  padding: 24px;
 }
 .list {
-  padding-top: 20px;
   .item {
     font-size: 14px;
     line-height: 32px;

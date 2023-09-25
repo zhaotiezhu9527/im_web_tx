@@ -95,16 +95,16 @@ function routePage(vim) {
 .input {
   height: 28px;
   line-height: 28px;
-  background-color: #ebebeb;
+  background-color: #ebf3fc;
   border: 0;
   border-radius: 4px;
 }
 .item {
   width: 100%;
-  padding: 6px 10px;
+  padding: 12px;
   cursor: pointer;
   &:hover {
-    background-color: #ebebeb;
+    background-color: #ebf3fc;
   }
 }
 </style>

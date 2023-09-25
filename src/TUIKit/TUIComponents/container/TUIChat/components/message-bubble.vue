@@ -317,7 +317,7 @@ const messageBubble = defineComponent({
     }
 
     const showReadReceiptTag = (message: any) => {
-      if (message.flow === 'out' && message.status === 'success' && message.needReadReceipt) {
+      if (message.flow === 'out' && message.status === 'success' && !message.needReadReceipt) {
         return true
       }
       return false
@@ -623,7 +623,7 @@ export default messageBubble
     word-break: break-all;
     width: fit-content;
     &-in {
-      background: #fbfbfb;
+      background: #fff;
       border-radius: 0px 10px 10px 10px;
     }
     &-out {

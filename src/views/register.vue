@@ -79,7 +79,6 @@ function userLogin() {
   background-color: #ffffff;
   border: 1px solid #ebedf0;
   box-shadow: 0px 2px 6px rgba(23, 23, 26, 0.1);
-  border-radius: 8px;
   padding: 74px 30px 80px;
   display: flex;
   flex-direction: column;
@@ -101,6 +100,6 @@ function userLogin() {
   padding-top: 10px;
 }
 .button {
-  border-radius: 2px !important;
+  border-radius: 0 !important;
 }
 </style>

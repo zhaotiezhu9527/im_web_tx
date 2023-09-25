@@ -20,34 +20,9 @@ const routes = [
         component: () => import('@/views/index.vue')
       },
       {
-        path: '/password',
-        name: 'password',
-        component: () => import('@/views/password.vue')
-      },
-      {
-        path: '/user',
-        name: 'user',
-        component: () => import('@/views/user.vue')
-      },
-      {
         path: '/friend',
         name: 'friend',
         component: () => import('@/views/friend.vue')
-      },
-      {
-        path: '/add',
-        name: 'add',
-        component: () => import('@/views/add.vue')
-      },
-      {
-        path: '/newfriend',
-        name: 'newfriend',
-        component: () => import('@/views/newfriend.vue')
-      },
-      {
-        path: '/black',
-        name: 'black',
-        component: () => import('@/views/black.vue')
       }
     ]
   },
@@ -105,7 +80,7 @@ function login_im_fn(next) {
     })
     window.$chat = chat
     window.$tx = TencentCloudChat
-
+    window.$chat.isReady()
     // 监听会话未读总数
     let onTotalUnreadMessageCountUpdated = function ({ data }) {
       window.$msgCount = data
@@ -149,6 +124,7 @@ function login_im_fn(next) {
             window.$message.error(imError.message)
           })
         router.push('/login')
+        window.$chat.destroy()
       })
     })
 

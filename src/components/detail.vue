@@ -1,30 +1,35 @@
 <template>
-  <div v-if="items" class="rows">
-    <div class="flex items-center pb-4 border-bottom">
-      <a-avatar :size="70" :src="items.avatar" />
-      <div class="content pl-2">
-        <div class="text-14px pb-2">昵称：{{ items.nick }}</div>
-        <div class="text-14px">账号：{{ items.userID }}</div>
-      </div>
-    </div>
-    <div class="list">
-      <div class="item">
-        <span>备注：</span>
-        <div class="flex">
-          <a-input class="mr-2" v-model:value="form.remark" placeholder="请输入备注" />
+  <a-modal class="modalInfo" v-model:open="show" centered :closable="false" :mask="false">
+    <template #title>
+      <div class="header">
+        <div class="flex items-center border-bottom">
+          <a-avatar :size="70" :src="items.avatar" />
+          <div class="content pl-2">
+            <div class="text-14px text-white">{{ items.nick }}</div>
+          </div>
         </div>
       </div>
-      <div class="item">
-        <span>性别：</span>
-        <div>{{ genderFn() }}</div>
-      </div>
-      <div class="item">
-        <span>个性签名：</span>
-        <div>{{ items.selfSignature }}</div>
-      </div>
-      <div class="item">
-        <span>留言：</span>
-        <div>{{ infos.wording }}</div>
+    </template>
+    <div class="rows">
+      <div class="list">
+        <div class="item">
+          <span>备注：</span>
+          <div class="flex">
+            <a-input class="mr-2" v-model:value="form.remark" placeholder="请输入备注" />
+          </div>
+        </div>
+        <div class="item">
+          <span>性别：</span>
+          <div>{{ genderFn() }}</div>
+        </div>
+        <div class="item">
+          <span>签名：</span>
+          <div>{{ items.selfSignature }}</div>
+        </div>
+        <div class="item">
+          <span>留言：</span>
+          <div>{{ infos.wording }}</div>
+        </div>
       </div>
       <div class="btn flex flex-col">
         <a-button
@@ -49,17 +54,22 @@
         </a-button>
       </div>
     </div>
-  </div>
+    <template #footer></template>
+  </a-modal>
 </template>
 <script setup>
 import { ref } from 'vue'
 const items = ref('')
+const show = ref(false)
 const infos = ref({})
+
 const form = ref({
   remark: '' // 备注
 })
 function open(val) {
+  console.log(val)
   infos.value = val
+  show.value = true
   window.$chat
     .getUserProfile({
       userIDList: [val.userID]
@@ -73,7 +83,7 @@ function open(val) {
 }
 function genderFn() {
   let name = ''
-  switch (this.items.gender) {
+  switch (items.value.gender) {
     case 'Gender_Type_Male':
       name = '男'
       break
@@ -97,6 +107,7 @@ function service() {
     .then(() => {
       window.$message.success('添加成功')
       items.value = ''
+      show.value = false
       emit('ok', 'add')
     })
 }
@@ -108,6 +119,7 @@ function blackChange() {
     .then(() => {
       window.$message.success('拒绝成功')
       items.value = ''
+      show.value = false
       emit('ok', 'error')
     })
 }
@@ -120,6 +132,7 @@ function delChange() {
     .then(() => {
       window.$message.success('删除成功')
       items.value = ''
+      show.value = false
       emit('ok', 'del')
     })
 }
@@ -127,14 +140,12 @@ defineExpose({ open })
 </script>
 <style lang="scss" scoped>
 .rows {
-  width: 400px;
   padding: 40px;
   .border-bottom {
     border-bottom: 1px solid #eee;
   }
 }
 .list {
-  padding-top: 20px;
   .item {
     font-size: 14px;
     line-height: 32px;
@@ -142,7 +153,7 @@ defineExpose({ open })
     align-items: center;
     color: #666;
     span {
-      width: 80px;
+      width: 60px;
     }
   }
 }

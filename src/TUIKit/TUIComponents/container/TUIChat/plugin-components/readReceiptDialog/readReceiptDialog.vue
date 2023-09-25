@@ -45,10 +45,16 @@
       </div>
       <div class="body-list">
         <ul>
-          <li v-for="(item, index) in readReceiptList[showListNow].userList" :key="index" class="body-list-item">
+          <li
+            v-for="(item, index) in readReceiptList[showListNow].userList"
+            :key="index"
+            class="body-list-item"
+          >
             <img
               class="avatar"
-              :src="item?.avatar || 'https://web.sdk.qcloud.com/component/TUIKit/assets/avatar_21.png'"
+              :src="
+                item?.avatar || 'https://web.sdk.qcloud.com/component/TUIKit/assets/avatar_21.png'
+              "
               onerror="this.src='https://web.sdk.qcloud.com/component/TUIKit/assets/avatar_21.png'"
             />
             <div class="name">
@@ -56,40 +62,42 @@
             </div>
           </li>
         </ul>
-        <div class="more" v-if="!readReceiptList[showListNow].isCompleted" @click="getMoreList">查看更多</div>
+        <div class="more" v-if="!readReceiptList[showListNow].isCompleted" @click="getMoreList">
+          查看更多
+        </div>
       </div>
     </div>
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, reactive, watchEffect, toRefs, watch, ref } from 'vue';
-import { onClickOutside } from '@vueuse/core';
-import { caculateTimeago, handleErrorPrompts } from '../../../utils';
-import { Message, userListItem } from '../../interface';
+import { defineComponent, reactive, watchEffect, toRefs, watch, ref } from 'vue'
+import { onClickOutside } from '@vueuse/core'
+import { caculateTimeago, handleErrorPrompts } from '../../../utils'
+import { Message, userListItem } from '../../interface'
 import {
   handleImageMessageShowContext,
   handleVideoMessageShowContext,
-  handleFaceMessageShowContext,
-} from '../../utils/utils';
-import { TUIEnv } from '../../../../../TUIPlugin';
+  handleFaceMessageShowContext
+} from '../../utils/utils'
+import { TUIEnv } from '../../../../../TUIPlugin'
 const ReadReceiptDialog = defineComponent({
   type: 'custom',
   props: {
     message: {
       type: Object,
-      default: () => ({}),
+      default: () => ({})
     },
     isH5: {
       type: Boolean,
-      default: false,
+      default: false
     },
     show: {
       type: Boolean,
-      default: () => false,
-    },
+      default: () => false
+    }
   },
   setup(props: any, ctx: any) {
-    const { t } = (window as any).TUIKitTUICore.config.i18n.useI18n();
+    const { t } = (window as any).TUIKitTUICore.config.i18n.useI18n()
     const data = reactive({
       message: {} as Message,
       isGroup: false,
@@ -97,7 +105,7 @@ const ReadReceiptDialog = defineComponent({
       isH5: false,
       messageInfo: {
         isImg: false,
-        content: '',
+        content: ''
       },
       readReceiptList: [
         {
@@ -106,7 +114,7 @@ const ReadReceiptDialog = defineComponent({
           userList: [] as userListItem[],
           isCompleted: true,
           cursor: '',
-          show: true,
+          show: true
         },
         {
           label: props.isH5 ? t('TUIChat.人未读') : t('TUIChat.未读'),
@@ -114,7 +122,7 @@ const ReadReceiptDialog = defineComponent({
           userList: [] as userListItem[],
           isCompleted: true,
           cursor: '',
-          show: true,
+          show: true
         },
         {
           label: props.isH5 ? t('TUIChat.人关闭阅读状态') : t('TUIChat.关闭阅读状态'),
@@ -122,131 +130,135 @@ const ReadReceiptDialog = defineComponent({
           userList: [] as userListItem[],
           isCompleted: true,
           cursor: '',
-          show: false,
-        },
+          show: false
+        }
       ],
       showListNow: 0,
       isMenuOpen: true,
-      env: TUIEnv(),
-    });
+      env: TUIEnv()
+    })
 
-    const dialog: any = ref();
+    const dialog: any = ref()
 
     watchEffect(() => {
-      data.show = props.show;
-      data.isH5 = props.isH5;
-    });
+      data.show = props.show
+      data.isH5 = props.isH5
+    })
 
     watch(
       () => {
-        props.message, data.show;
+        props.message, data.show
       },
       async () => {
-        if (!data.show) return;
-        handleDialogPosition();
-        data.message = props.message;
-        isGroup();
-        showMessage();
-        data.readReceiptList[0].count = data.message?.readReceiptInfo?.readCount || data.readReceiptList[0].count;
-        data.readReceiptList[1].count = data.message?.readReceiptInfo?.unreadCount || data.readReceiptList[1].count;
-        getReadList();
-        getUnreadList();
+        if (!data.show) return
+        handleDialogPosition()
+        data.message = props.message
+        isGroup()
+        showMessage()
+        data.readReceiptList[0].count =
+          data.message?.readReceiptInfo?.readCount || data.readReceiptList[0].count
+        data.readReceiptList[1].count =
+          data.message?.readReceiptInfo?.unreadCount || data.readReceiptList[1].count
+        getReadList()
+        getUnreadList()
       },
       { deep: true }
-    );
+    )
 
     const toggleShow = () => {
-      data.show = !data.show;
+      data.show = !data.show
       if (!data.show) {
-        ctx.emit('closeDialog', 'receipt');
-        close();
+        ctx.emit('closeDialog', 'receipt')
+        close()
       }
-    };
+    }
 
     onClickOutside(dialog, () => {
-      data.show = false;
-      ctx.emit('closeDialog', 'receipt');
-      close();
-    });
+      data.show = false
+      ctx.emit('closeDialog', 'receipt')
+      close()
+    })
 
     const getReadList = async (more = false) => {
-      if (!data.isGroup || !data.message || Object.keys(data.message).length === 0) return;
+      if (!data.isGroup || !data.message || Object.keys(data.message).length === 0) return
       try {
         const obj = await ReadReceiptDialog.TUIServer.getGroupReadMemberList(
           data.message,
           more ? data.readReceiptList[0].cursor : ''
-        );
-        data.readReceiptList[0].isCompleted = obj?.data?.isCompleted;
-        data.readReceiptList[0].cursor = obj?.data?.cursor || '';
-        const list = obj.data.readUserIDList;
-        const readList: userListItem[] = await handleAvatarAndName(list);
+        )
+        data.readReceiptList[0].isCompleted = obj?.data?.isCompleted
+        data.readReceiptList[0].cursor = obj?.data?.cursor || ''
+        const list = obj.data.readUserIDList
+        const readList: userListItem[] = await handleAvatarAndName(list)
         data.readReceiptList[0].userList = more
           ? ([...data.readReceiptList[0].userList, ...readList] as userListItem[])
-          : readList;
+          : readList
       } catch (error) {
         if (error && (error as any)?.code === 10062) {
-          const message = t('TUIChat.您当前购买使用的套餐包暂未开通群消息已读回执功能');
-          handleErrorPrompts(message, data.env);
-          console.warn(message);
+          const message = t('TUIChat.您当前购买使用的套餐包暂未开通群消息已读回执功能')
+          handleErrorPrompts(message, data.env)
+          console.warn(message)
         }
       }
-    };
+    }
 
     const getUnreadList = async (more = false) => {
-      if (!data.isGroup || !data.message || Object.keys(data.message).length === 0) return;
+      if (!data.isGroup || !data.message || Object.keys(data.message).length === 0) return
       const obj = await ReadReceiptDialog.TUIServer.getGroupUnreadMemberList(
         data.message,
         more ? data.readReceiptList[1].cursor : ''
-      );
-      data.readReceiptList[1].isCompleted = obj?.data.isCompleted;
-      data.readReceiptList[1].cursor = obj?.data?.cursor || '';
-      const list = obj.data.unreadUserIDList;
-      const unreadList: userListItem[] = await handleAvatarAndName(list);
+      )
+      data.readReceiptList[1].isCompleted = obj?.data.isCompleted
+      data.readReceiptList[1].cursor = obj?.data?.cursor || ''
+      const list = obj.data.unreadUserIDList
+      const unreadList: userListItem[] = await handleAvatarAndName(list)
       data.readReceiptList[1].userList = more
         ? ([...data.readReceiptList[1].userList, ...unreadList] as userListItem[])
-        : unreadList;
-    };
+        : unreadList
+    }
 
     const handleAvatarAndName = async (list: any) => {
-      const avatarAndNameList: userListItem[] = [];
+      const avatarAndNameList: userListItem[] = []
       if (list.length && data.isGroup) {
-        const obj = await ReadReceiptDialog.TUIServer.getUserProfile(list);
-        const userProfileList = obj.data;
+        const obj = await ReadReceiptDialog.TUIServer.getUserProfile(list)
+        const userProfileList = obj.data
         userProfileList.forEach((item: any) => {
           avatarAndNameList.push({
             nick: item?.nick,
             avatar: item?.avatar,
-            userID: item?.userID,
-          });
-        });
+            userID: item?.userID
+          })
+        })
       }
-      return avatarAndNameList;
-    };
+      return avatarAndNameList
+    }
 
     const isGroup = () => {
-      if (data.message?.conversationType === ReadReceiptDialog.TUIServer.TUICore.TIM.TYPES.CONV_GROUP) {
-        data.isGroup = true;
+      if (
+        data.message?.conversationType === ReadReceiptDialog.TUIServer.TUICore.TIM.TYPES.CONV_GROUP
+      ) {
+        data.isGroup = true
       } else {
-        data.isGroup = false;
+        data.isGroup = false
       }
-      return;
-    };
+      return
+    }
 
     const getMoreList = () => {
       switch (data.showListNow) {
         case 0:
-          getReadList(true);
-          break;
+          getReadList(true)
+          break
         case 1:
-          getUnreadList(true);
-          break;
+          getUnreadList(true)
+          break
         default:
-          break;
+          break
       }
-    };
+    }
 
     const close = () => {
-      data.message = {};
+      data.message = {}
       data.readReceiptList = [
         {
           label: props.isH5 ? t('TUIChat.人已读') : t('TUIChat.已读'),
@@ -254,7 +266,7 @@ const ReadReceiptDialog = defineComponent({
           userList: [] as userListItem[],
           isCompleted: true,
           cursor: '',
-          show: true,
+          show: true
         },
         {
           label: props.isH5 ? t('TUIChat.人未读') : t('TUIChat.未读'),
@@ -262,7 +274,7 @@ const ReadReceiptDialog = defineComponent({
           userList: [] as userListItem[],
           isCompleted: true,
           cursor: '',
-          show: true,
+          show: true
         },
         {
           label: props.isH5 ? t('TUIChat.人关闭阅读状态') : t('TUIChat.关闭阅读状态'),
@@ -270,53 +282,53 @@ const ReadReceiptDialog = defineComponent({
           userList: [] as userListItem[],
           isCompleted: true,
           cursor: '',
-          show: false,
-        },
-      ];
-      data.showListNow = 0;
+          show: false
+        }
+      ]
+      data.showListNow = 0
       data.messageInfo = {
         isImg: false,
-        content: '',
-      };
-    };
+        content: ''
+      }
+    }
 
     const showMessage = () => {
-      if (!data.message || !data.isH5) return;
+      if (!data.message || !data.isH5) return
       switch ((data.message as any).type) {
         case ReadReceiptDialog.TUIServer.TUICore.TIM.TYPES.MSG_TEXT:
-          data.messageInfo.content = data.message?.payload?.text;
-          data.messageInfo.isImg = false;
-          break;
+          data.messageInfo.content = data.message?.payload?.text
+          data.messageInfo.isImg = false
+          break
         case ReadReceiptDialog.TUIServer.TUICore.TIM.TYPES.MSG_CUSTOM:
-          data.messageInfo.content = t('TUIChat.自定义');
-          data.messageInfo.isImg = false;
-          break;
+          data.messageInfo.content = t('TUIChat.自定义')
+          data.messageInfo.isImg = false
+          break
         case ReadReceiptDialog.TUIServer.TUICore.TIM.TYPES.MSG_IMAGE:
-          data.messageInfo.content = handleImageMessageShowContext(data.message)?.url;
-          data.messageInfo.isImg = true;
-          break;
+          data.messageInfo.content = handleImageMessageShowContext(data.message)?.url
+          data.messageInfo.isImg = true
+          break
         case ReadReceiptDialog.TUIServer.TUICore.TIM.TYPES.MSG_AUDIO:
-          data.messageInfo.content = t('TUIChat.语音');
-          data.messageInfo.isImg = false;
-          break;
+          data.messageInfo.content = t('TUIChat.语音')
+          data.messageInfo.isImg = false
+          break
         case ReadReceiptDialog.TUIServer.TUICore.TIM.TYPES.MSG_VIDEO:
-          data.messageInfo.content = handleVideoMessageShowContext(data.message)?.snapshotUrl;
-          data.messageInfo.isImg = true;
-          break;
+          data.messageInfo.content = handleVideoMessageShowContext(data.message)?.snapshotUrl
+          data.messageInfo.isImg = true
+          break
         case ReadReceiptDialog.TUIServer.TUICore.TIM.TYPES.MSG_FILE:
-          data.messageInfo.content = t('TUIChat.文件') + data.message?.payload?.fileName;
-          data.messageInfo.isImg = false;
-          break;
+          data.messageInfo.content = t('TUIChat.文件') + data.message?.payload?.fileName
+          data.messageInfo.isImg = false
+          break
         case ReadReceiptDialog.TUIServer.TUICore.TIM.TYPES.MSG_FACE:
-          data.messageInfo.content = handleFaceMessageShowContext(data.message)?.url;
-          data.messageInfo.isImg = true;
-          break;
+          data.messageInfo.content = handleFaceMessageShowContext(data.message)?.url
+          data.messageInfo.isImg = true
+          break
       }
-    };
+    }
 
     const handleDialogPosition = () => {
-      data.isMenuOpen = !!document?.getElementsByClassName('home-menu')?.length;
-    };
+      data.isMenuOpen = !!document?.getElementsByClassName('home-menu')?.length
+    }
 
     return {
       ...toRefs(data),
@@ -330,10 +342,10 @@ const ReadReceiptDialog = defineComponent({
       getMoreList,
       showMessage,
       caculateTimeago,
-      handleDialogPosition,
-    };
-  },
-});
-export default ReadReceiptDialog;
+      handleDialogPosition
+    }
+  }
+})
+export default ReadReceiptDialog
 </script>
 <style lang="scss" scoped src="./style/index.scss"></style>
