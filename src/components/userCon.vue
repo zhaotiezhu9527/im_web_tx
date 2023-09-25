@@ -11,7 +11,10 @@
       </div>
     </template>
     <div class="rows">
-      <a-form layout="horizontal" :model="items" :label-col="{ style: { width: '80px' } }">
+      <a-form layout="horizontal" :model="items" :label-col="{ style: { width: '60px' } }">
+        <a-form-item label="账号：">
+          <a-input size="middle" disabled v-model:value="userID" placeholder="请输入账号" />
+        </a-form-item>
         <a-form-item label="昵称：">
           <a-input size="middle" v-model:value="items.nick" placeholder="请输入昵称" />
         </a-form-item>
@@ -23,8 +26,8 @@
             :options="optionsGender"
           />
         </a-form-item>
-        <a-form-item label="个性签名：">
-          <a-input size="middle" v-model:value="items.selfSignature" placeholder="请输入个性签名" />
+        <a-form-item label="签名：">
+          <a-textarea size="middle" v-model:value="items.selfSignature" placeholder="请输入签名" />
         </a-form-item>
       </a-form>
     </div>
@@ -39,6 +42,7 @@
 <script setup>
 import { ref } from 'vue'
 const show = ref(false)
+const userID = ref('')
 const items = ref({
   avatar: '',
   nick: '',
@@ -56,7 +60,6 @@ const optionsGender = [
     value: window.$tx.TYPES.GENDER_FEMALE
   }
 ]
-const userID = ref('')
 function open() {
   // 获取个人信息
   window.$chat.getMyProfile().then(({ data }) => {
@@ -99,7 +102,7 @@ defineExpose({ open })
     }
   }
 }
-.button{
+.button {
   border-radius: 0 !important;
 }
 </style>

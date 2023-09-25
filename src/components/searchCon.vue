@@ -19,7 +19,7 @@
           >
             <template #prefix> <i class="iconfont icon-icon-test12"></i> </template>
           </a-input>
-          <i class="iconfont icon-cuowuguanbiquxiao ml-3"></i>
+          <i class="iconfont icon-cuowuguanbiquxiao ml-3 cursor-pointer" @click="cancel"></i>
         </div>
       </template>
       <div class="content">
