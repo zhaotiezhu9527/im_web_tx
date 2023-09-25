@@ -40,16 +40,16 @@ function dataFn() {
   window.$chat.getFriendList().then(({ data }) => {
     if (!data.length) return false
     data.forEach((e) => {
-      e.cn = pinyin(e.remark || e.profile.nick)
-      e.en = pinyin(e.remark || e.profile.nick).slice(0, 1)
+      e.cn = pinyin(e.remark || e.profile?.nick)
+      e.en = pinyin(e.remark || e.profile?.nick).slice(0, 1)
       let that = list.value.find(
-        (item) => item.en === pinyin(e.remark || e.profile.nick).slice(0, 1)
+        (item) => item.en === pinyin(e.remark || e.profile?.nick).slice(0, 1)
       )
       if (that) {
         that.list.push(e)
       } else {
         list.value.push({
-          en: pinyin(e.remark || e.profile.nick).slice(0, 1),
+          en: pinyin(e.remark || e.profile?.nick).slice(0, 1),
           list: [e]
         })
       }
@@ -57,13 +57,13 @@ function dataFn() {
     list.value = list.value.map((item) => {
       return {
         en: item.en,
-        list: item.list.sort((a, b) => {
-          return a.cn.localeCompare(b.cn)
+        list: item?.list?.sort((a, b) => {
+          return a?.cn?.localeCompare(b.cn)
         })
       }
     })
     list.value = list.value.sort((a, b) => {
-      return a.cn.localeCompare(b.cn)
+      return a?.cn?.localeCompare(b.cn)
     })
   })
 }

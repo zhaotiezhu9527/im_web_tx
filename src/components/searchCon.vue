@@ -15,6 +15,7 @@
             class="input"
             v-model:value="search"
             @pressEnter="change"
+            @input="change"
             placeholder="请搜索好友"
           >
             <template #prefix> <i class="iconfont icon-icon-test12"></i> </template>
@@ -23,7 +24,7 @@
         </div>
       </template>
       <div class="content">
-        <div class="title">好友</div>
+        <div class="title" v-if="list.length">好友</div>
         <div
           v-for="(item, index) in list"
           :key="index"
@@ -35,6 +36,8 @@
             <div class="pl-2 text-14px" v-html="titleFn(item.remark || item.profile.nick)"></div>
           </div>
         </div>
+        <a-empty description="暂无数据" :image="simpleImage" class="pt-10" v-if="!list.length">
+        </a-empty>
       </div>
       <template #footer> </template>
     </a-modal>
@@ -42,7 +45,9 @@
 </template>
 <script setup>
 import { ref } from 'vue'
+import { Empty } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
+const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE
 const router = useRouter()
 // 添加好友
 const show = ref(false)
@@ -63,7 +68,10 @@ function titleFn(e) {
 function change() {
   let all = JSON.parse(JSON.stringify(listAll.value))
   list.value = all.filter(
-    (item) => item?.profile?.nick.includes(search.value) || item?.remark.includes(search.value)
+    (item) =>
+      item?.profile?.nick.includes(search.value) ||
+      item?.remark.includes(search.value) ||
+      item?.profile?.userID.includes(search.value)
   )
 }
 dataFn()
@@ -126,5 +134,9 @@ defineExpose({ open })
 }
 .ant-modal-content {
   padding: 0;
+}
+.content {
+  overflow: auto;
+  height: 400px;
 }
 </style>

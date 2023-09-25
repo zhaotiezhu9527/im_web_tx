@@ -15,7 +15,8 @@ import {
   toRefs,
   computed,
   nextTick,
-  onUnmounted
+  onUnmounted,
+  onBeforeUnmount
 } from 'vue'
 import { handleName, JSONToObject, isTypingMessage } from '../../utils/utils'
 import constant from '../../../constant'
@@ -96,10 +97,15 @@ const TypingHeader = defineComponent({
     const is_status = ref('')
     onUnmounted(() => {
       clearInterval(time)
+      time = null
+    })
+    onBeforeUnmount(() => {
+      clearInterval(time)
+      time = null
     })
     // 测试
     let time: any = null
-    time = setInterval(() => is_status_Fn(), 10000)
+    time = setInterval(() => is_status_Fn(), 1000)
     is_status_Fn()
     function is_status_Fn() {
       if (data.conversation?.userProfile?.userID) {

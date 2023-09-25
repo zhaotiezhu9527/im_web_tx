@@ -46,7 +46,7 @@
 <script setup>
 import { Empty } from 'ant-design-vue'
 const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE
-import { ref, onMounted, watch, onUnmounted } from 'vue'
+import { ref, onMounted, watch, onBeforeUnmount, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
@@ -116,12 +116,17 @@ function dataFn() {
         window.$chat
           .getUserStatus({ userIDList: uid })
           .then((event) => listFn(event.data.successUserList))
-      }, 10000)
+      }, 1000)
     }
   })
 }
 onUnmounted(() => {
   clearInterval(time)
+  time = null
+})
+onBeforeUnmount(() => {
+  clearInterval(time)
+  time = null
 })
 function listFn(all) {
   list.value = list.value.map((vim) => {
