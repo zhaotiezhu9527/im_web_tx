@@ -2,8 +2,8 @@ import axios from 'axios'
 import Cookies from 'js-cookie'
 import { message } from 'ant-design-vue'
 const service = axios.create({
-  baseURL: 'http://im.juhai.xyz/im-qtapi-test', //测试接口地址
-  // baseURL: '/im-qtapi-prod', //正式接口地址
+  // baseURL: 'http://im.juhai.xyz/im-qtapi-test', //测试接口地址
+  baseURL: '/im-qtapi-prod', //正式接口地址
   timeout: 60000, // 请求超时时间 毫秒
   headers: {
     'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
