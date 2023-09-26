@@ -108,12 +108,12 @@ function dataFn() {
       window.$chat
         .getUserStatus({ userIDList: uid })
         .then((event) => listFn(event.data.successUserList))
-      window.$chat.on(window.$tx.EVENT.USER_STATUS_UPDATED, (event) => listFn(event.daat))
+      window.$chat.on(window.$tx.EVENT.USER_STATUS_UPDATED, (event) => listFn(event.data))
       time = setInterval(() => {
         window.$chat
           .getUserStatus({ userIDList: uid })
           .then((event) => listFn(event.data.successUserList))
-      }, 1000)
+      }, 10000)
     }
   })
 }
@@ -127,10 +127,10 @@ onBeforeUnmount(() => {
 })
 function listFn(all) {
   list.value = list.value.map((vim) => {
-    let that = all.find((e) => e.userID === vim.userProfile?.userID)
+    let that = all.find((e) => e.userID === vim?.userID || e.userID === vim.userProfile?.userID)
     return {
       ...vim,
-      statusType: statusTypeFn(that.statusType)
+      statusType: statusTypeFn(that?.statusType)
     }
   })
 }

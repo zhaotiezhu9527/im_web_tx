@@ -107,4 +107,11 @@ body {
     }
   }
 }
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background-color: #ccc !important;
+}
 </style>

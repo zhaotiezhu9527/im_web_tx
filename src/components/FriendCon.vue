@@ -56,16 +56,27 @@ function dataFn() {
     })
     list.value = list.value.map((item) => {
       return {
-        en: item.en,
+        en: nameFn(item.en),
         list: item?.list?.sort((a, b) => {
           return a?.cn?.localeCompare(b.cn)
         })
       }
     })
     list.value = list.value.sort((a, b) => {
-      return a?.cn?.localeCompare(b.cn)
+      return a?.en?.localeCompare(b.en)
     })
   })
+}
+let txtAll = [
+  { key: 'a', val: ['ā', 'á', 'ǎ', 'à'] },
+  { key: 'o', val: ['ō', 'ó', 'ǒ', 'ò'] },
+  { key: 'e', val: ['ê', 'ē', 'é', 'ě', 'è'] },
+  { key: 'i', val: ['ī', 'í', 'ǐ', 'ì'] },
+  { key: 'u', val: ['ū', 'ú', 'ǔ', 'ù'] }
+]
+function nameFn(val) {
+  let that = txtAll.find((e) => e.val.includes(val))
+  return that?.key?.toUpperCase() || val.toUpperCase()
 }
 const infoscnRef = ref({})
 const active = ref(null)
