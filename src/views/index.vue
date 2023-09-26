@@ -146,6 +146,7 @@ function statusTypeFn(val) {
   }
 }
 function routePage(item) {
+  usetoken.setRemark(item.remark || item?.userProfile?.nick)
   active.value = item.conversationID
   window.$chat.getConversationProfile(item.conversationID).then((imResponse) => {
     if (imResponse.data.conversation) {
