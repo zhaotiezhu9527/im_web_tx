@@ -30,7 +30,7 @@
       <TUIChat ref="chatRef">
         <div class="content flex flex-col justify-center items-center">
           <img class="img" src="@/assets/img2.png" />
-          <div class="">欢迎使用IM</div>
+          <div class="">欢迎使用金抖云</div>
         </div>
       </TUIChat>
     </div>
