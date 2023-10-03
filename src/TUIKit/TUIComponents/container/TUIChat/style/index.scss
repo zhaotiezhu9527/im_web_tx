@@ -1,5 +1,13 @@
 @import url('../../../styles/common.scss');
 @import url('../../../styles/icon.scss');
-@import "./color.scss";
-@import "./web.scss";
-@import "./h5.scss";
+@import './color.scss';
+@import './web.scss';
+@import './h5.scss';
+.func-main {
+  display: flex;
+  align-items: center;
+}
+.icon-jietu {
+  font-size: 20px;
+  margin: 8px 10px 0;
+}

@@ -153,11 +153,12 @@ const handleEnter = (e: any) => {
 // fileMap 存储 fileURL 与 fileObject 的映射
 const fileMap = new Map<string, any>()
 const handleFileDropOrPaste = async (e: any, type: string) => {
+  console.log(e, type)
   e.preventDefault()
   e.stopPropagation()
-  if (isH5.value) {
-    return
-  }
+  // if (isH5.value) {
+  //   return
+  // }
   if (!enableDragUpload?.value && type === 'drop') {
     return
   }

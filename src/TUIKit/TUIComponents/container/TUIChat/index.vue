@@ -115,6 +115,7 @@
               parentID="func"
               @send="handleSend"
             ></component>
+            <span class="upload-btn icon iconfont icon-jietu" title="截图" @click="btnClick"></span>
           </main>
         </div>
         <MessageInput
@@ -181,7 +182,7 @@ import {
 } from './utils/utils'
 
 import { getComponents } from './index'
-
+import ScreenShort from 'js-web-screen-shot'
 import { useStore } from 'vuex'
 import constant from '../constant'
 import { handleErrorPrompts } from '../utils'
@@ -891,8 +892,36 @@ const TUIChat: any = defineComponent({
       ;(data?.typingRef as any)?.onTyping(inputContentEmpty, inputBlur)
     }
 
+    //调用
+    const btnClick = () => {
+      const screenShotHandler = new ScreenShort({
+        enableWebRtc: true, //是否显示选项框
+        level: 9999, //层级级别
+        completeCallback: (e) => {
+          var arr = e.base64.split(','),
+            mime = arr[0].match(/:(.*?);/)[1],
+            bstr = atob(arr[1]),
+            n = bstr.length,
+            u8arr = new Uint8Array(n)
+          while (n--) {
+            u8arr[n] = bstr.charCodeAt(n)
+          }
+          ;``
+          let file = new Blob([u8arr], { type: mime })
+          let reader = new FileReader()
+          reader.readAsDataURL(file)
+          reader.onload = async function (e) {
+            // console.log(e)
+            //   TUIServer?.sendImageMessage(e)
+          }
+        },
+        closeCallback: (e) => {} // 截图取消的回调
+      })
+    }
+
     return {
       ...toRefs(data),
+      btnClick,
       is_footer,
       conversationType,
       messages,

@@ -1,7 +1,7 @@
-import { TUINotification } from '../../../TUIPlugin';
-import Message from '../../../TUICore/tim/index';
-import IComponentServer from '../IComponentServer';
-import { isTypingMessage, JSONToObject } from './utils/utils';
+import { TUINotification } from '../../../TUIPlugin'
+import Message from '../../../TUICore/tim/index'
+import IComponentServer from '../IComponentServer'
+import { isTypingMessage, JSONToObject } from './utils/utils'
 
 /**
  * class TUIChatServer
@@ -9,14 +9,14 @@ import { isTypingMessage, JSONToObject } from './utils/utils';
  * TUIChat 逻辑主体
  */
 export default class TUIChatServer extends IComponentServer {
-  public TUICore: any;
-  public store: any;
-  public currentStore: any = {};
+  public TUICore: any
+  public store: any
+  public currentStore: any = {}
   constructor(TUICore: any) {
-    super();
-    this.TUICore = TUICore;
-    this.bindTIMEvent();
-    this.store = TUICore.setComponentStore('TUIChat', {}, this.updateStore.bind(this));
+    super()
+    this.TUICore = TUICore
+    this.bindTIMEvent()
+    this.store = TUICore.setComponentStore('TUIChat', {}, this.updateStore.bind(this))
   }
 
   /**
@@ -24,7 +24,7 @@ export default class TUIChatServer extends IComponentServer {
    * destroy
    */
   public destroyed() {
-    this.unbindTIMEvent();
+    this.unbindTIMEvent()
   }
 
   /**
@@ -36,49 +36,47 @@ export default class TUIChatServer extends IComponentServer {
    *
    */
   updateStore(newValue: any, oldValue: any) {
-    Object.assign(this.currentStore, newValue);
+    Object.assign(this.currentStore, newValue)
     if (!newValue.conversation.conversationID) {
-      this.currentStore.messageList = [];
-      return;
+      this.currentStore.messageList = []
+      return
     }
     if (
       newValue.conversation.conversationID &&
       newValue.conversation.conversationID !== oldValue.conversation.conversationID
     ) {
-      this.render(newValue.conversation);
+      this.render(newValue.conversation)
     }
   }
 
   public render(conversation: any) {
-    const len = 15;
-    this.currentStore.isFirstRender = true;
-    this.currentStore.messageList = [];
-    this.currentStore.readSet.clear();
-    this.getMessageList({ conversationID: conversation.conversationID, count: len });
+    const len = 15
+    this.currentStore.isFirstRender = true
+    this.currentStore.messageList = []
+    this.currentStore.readSet.clear()
+    this.getMessageList({ conversationID: conversation.conversationID, count: len })
     if (conversation.type === this.TUICore.TIM.TYPES.CONV_GROUP) {
-      this.currentStore.userInfo.isGroup = true;
+      this.currentStore.userInfo.isGroup = true
       const options = {
         groupID: conversation.groupProfile.groupID,
-        userIDList: [conversation.groupProfile.selfInfo.userID],
-      };
-      this.getGroupProfile({ groupID: conversation.groupProfile.groupID });
+        userIDList: [conversation.groupProfile.selfInfo.userID]
+      }
+      this.getGroupProfile({ groupID: conversation.groupProfile.groupID })
       this.getGroupMemberProfile(options).then((res: any) => {
-        const { memberList } = res.data;
-        const [selfInfo] = memberList;
-        this.currentStore.selfInfo = selfInfo;
-      });
-      this?.TUICore?.TUIServer?.TUIGroup?.getGroupMemberList(
-        {
-          groupID: conversation.groupProfile.groupID,
-          count: 100,
-          offset: 0,
-        }
-      ).then((res: any) => {
-        this.currentStore.allMemberList = res.data?.memberList;
+        const { memberList } = res.data
+        const [selfInfo] = memberList
+        this.currentStore.selfInfo = selfInfo
+      })
+      this?.TUICore?.TUIServer?.TUIGroup?.getGroupMemberList({
+        groupID: conversation.groupProfile.groupID,
+        count: 100,
+        offset: 0
+      }).then((res: any) => {
+        this.currentStore.allMemberList = res.data?.memberList
       })
     } else {
-      this.currentStore.userInfo.isGroup = false;
-      this.currentStore.userInfo.list = [conversation?.userProfile];
+      this.currentStore.userInfo.isGroup = false
+      this.currentStore.userInfo.list = [conversation?.userProfile]
     }
   }
 
@@ -92,67 +90,78 @@ export default class TUIChatServer extends IComponentServer {
    */
 
   private bindTIMEvent() {
-    this.TUICore.tim.on(this.TUICore.TIM.EVENT.MESSAGE_RECEIVED, this.handleMessageReceived, this);
-    this.TUICore.tim.on(this.TUICore.TIM.EVENT.MESSAGE_MODIFIED, this.handleMessageModified, this);
-    this.TUICore.tim.on(this.TUICore.TIM.EVENT.MESSAGE_REVOKED, this.handleMessageRevoked, this);
-    this.TUICore.tim.on(this.TUICore.TIM.EVENT.MESSAGE_READ_BY_PEER, this.handleMessageReadByPeer, this);
-    this.TUICore.tim.on(this.TUICore.TIM.EVENT.GROUP_LIST_UPDATED, this.handleGroupListUpdated, this);
+    this.TUICore.tim.on(this.TUICore.TIM.EVENT.MESSAGE_RECEIVED, this.handleMessageReceived, this)
+    this.TUICore.tim.on(this.TUICore.TIM.EVENT.MESSAGE_MODIFIED, this.handleMessageModified, this)
+    this.TUICore.tim.on(this.TUICore.TIM.EVENT.MESSAGE_REVOKED, this.handleMessageRevoked, this)
+    this.TUICore.tim.on(
+      this.TUICore.TIM.EVENT.MESSAGE_READ_BY_PEER,
+      this.handleMessageReadByPeer,
+      this
+    )
+    this.TUICore.tim.on(
+      this.TUICore.TIM.EVENT.GROUP_LIST_UPDATED,
+      this.handleGroupListUpdated,
+      this
+    )
     this.TUICore.tim.on(
       this.TUICore.TIM.EVENT.MESSAGE_READ_RECEIPT_RECEIVED,
       this.handleMessageReadReceiptReceived,
       this
-    );
+    )
   }
 
   private unbindTIMEvent() {
-    this.TUICore.tim.off(this.TUICore.TIM.EVENT.MESSAGE_RECEIVED, this.handleMessageReceived);
-    this.TUICore.tim.off(this.TUICore.TIM.EVENT.MESSAGE_MODIFIED, this.handleMessageModified);
-    this.TUICore.tim.off(this.TUICore.TIM.EVENT.MESSAGE_REVOKED, this.handleMessageRevoked);
-    this.TUICore.tim.off(this.TUICore.TIM.EVENT.MESSAGE_READ_BY_PEER, this.handleMessageReadByPeer);
-    this.TUICore.tim.off(this.TUICore.TIM.EVENT.GROUP_LIST_UPDATED, this.handleGroupListUpdated);
-    this.TUICore.tim.off(this.TUICore.TIM.EVENT.MESSAGE_READ_RECEIPT_RECEIVED, this.handleMessageReadReceiptReceived);
+    this.TUICore.tim.off(this.TUICore.TIM.EVENT.MESSAGE_RECEIVED, this.handleMessageReceived)
+    this.TUICore.tim.off(this.TUICore.TIM.EVENT.MESSAGE_MODIFIED, this.handleMessageModified)
+    this.TUICore.tim.off(this.TUICore.TIM.EVENT.MESSAGE_REVOKED, this.handleMessageRevoked)
+    this.TUICore.tim.off(this.TUICore.TIM.EVENT.MESSAGE_READ_BY_PEER, this.handleMessageReadByPeer)
+    this.TUICore.tim.off(this.TUICore.TIM.EVENT.GROUP_LIST_UPDATED, this.handleGroupListUpdated)
+    this.TUICore.tim.off(
+      this.TUICore.TIM.EVENT.MESSAGE_READ_RECEIPT_RECEIVED,
+      this.handleMessageReadReceiptReceived
+    )
   }
 
   private handleMessageReceived(event: any) {
     event?.data?.forEach((message: Message) => {
       if (message?.conversationID === this?.store?.conversation?.conversationID) {
-        this.currentStore.messageList = [...this.currentStore.messageList, message];
+        this.currentStore.messageList = [...this.currentStore.messageList, message]
       }
-      TUINotification.getInstance().notify(message);
-    });
+      TUINotification.getInstance().notify(message)
+    })
   }
 
   private handleMessageModified(event: any) {
-    const middleData = this.currentStore.messageList;
-    this.currentStore.messageList = [];
-    this.currentStore.messageList = middleData;
+    const middleData = this.currentStore.messageList
+    this.currentStore.messageList = []
+    this.currentStore.messageList = middleData
   }
   private handleMessageRevoked(event: any) {
-    const middleData = this.currentStore.messageList;
-    this.currentStore.messageList = [];
-    this.currentStore.messageList = middleData;
+    const middleData = this.currentStore.messageList
+    this.currentStore.messageList = []
+    this.currentStore.messageList = middleData
   }
   private handleMessageReadByPeer(event: any) {
-    const middleData = this.currentStore.messageList;
-    this.currentStore.messageList = [];
-    this.currentStore.messageList = middleData;
+    const middleData = this.currentStore.messageList
+    this.currentStore.messageList = []
+    this.currentStore.messageList = middleData
   }
 
   private handleGroupListUpdated(event: any) {
     event?.data.map((item: any) => {
       if (item?.groupID === this?.store?.conversation?.groupProfile?.groupID) {
-        this.store.conversation.groupProfile = item;
-        this.currentStore.conversation = {};
-        this.currentStore.conversation = this.store.conversation;
+        this.store.conversation.groupProfile = item
+        this.currentStore.conversation = {}
+        this.currentStore.conversation = this.store.conversation
       }
-      return item;
-    });
+      return item
+    })
   }
 
   private handleMessageReadReceiptReceived(event: any) {
-    const middleData = this.currentStore.messageList;
-    this.currentStore.messageList = [];
-    this.currentStore.messageList = middleData;
+    const middleData = this.currentStore.messageList
+    this.currentStore.messageList = []
+    this.currentStore.messageList = middleData
   }
 
   /**
@@ -179,31 +188,32 @@ export default class TUIChatServer extends IComponentServer {
       to: '',
       conversationType: to?.type || this.store.conversation.type,
       payload: content,
-      needReadReceipt: this.currentStore.needReadReceipt,
-    };
+      needReadReceipt: this.currentStore.needReadReceipt
+    }
     if (this.currentStore.needTyping) {
       options.cloudCustomData = {
         messageFeature: {
           needTyping: 1,
-          version: 1,
-        },
-      };
-      options.cloudCustomData = JSON.stringify(options.cloudCustomData);
+          version: 1
+        }
+      }
+      options.cloudCustomData = JSON.stringify(options.cloudCustomData)
     }
     if (type === 'file' && callback) {
-      options.onProgress = callback;
+      options.onProgress = callback
     }
     switch (options.conversationType) {
       case this.TUICore.TIM.TYPES.CONV_C2C:
-        options.to = to?.userProfile?.userID || this.store.conversation?.userProfile?.userID || '';
-        break;
+        options.to = to?.userProfile?.userID || this.store.conversation?.userProfile?.userID || ''
+        break
       case this.TUICore.TIM.TYPES.CONV_GROUP:
-        options.to = to?.groupProfile?.groupID || this.store.conversation?.groupProfile?.groupID || '';
-        break;
+        options.to =
+          to?.groupProfile?.groupID || this.store.conversation?.groupProfile?.groupID || ''
+        break
       default:
-        break;
+        break
     }
-    return options;
+    return options
   }
 
   /**
@@ -218,44 +228,49 @@ export default class TUIChatServer extends IComponentServer {
       const config = {
         TUIName: 'TUIChat',
         callback: () => {
-          callback && callback(resolve, reject);
-        },
-      };
-      this.TUICore.setAwaitFunc(config.TUIName, config.callback);
-    });
+          callback && callback(resolve, reject)
+        }
+      }
+      this.TUICore.setAwaitFunc(config.TUIName, config.callback)
+    })
   }
 
   /**
    * 重试异步函数
    * Retry asynchronous functions
    * 默认执行一次，之后按时间间隔列表重复执行直到成功，重复次数完毕后仍失败则失败
-   * Execute once by default, and then repeat it according to the time interval list until it succeeds. 
+   * Execute once by default, and then repeat it according to the time interval list until it succeeds.
    * If it still fails after the number of repetitions is complete, it will reject.
-   * 
+   *
    * @param {callback} callback 回调函数/callback function
    * @param {Array<number>} intervalList 间隔时间列表/interval list
    * @param {callback} retryBreakFn 强制重复结束条件函数/break retry function
    * @returns {Promise} 返回异步函数/return
    */
-  public handlePromiseCallbackRetry(callback: any, intervalList: Array<number> = [], retryBreakFn: any = function () { return false; }): Promise<any> {
+  public handlePromiseCallbackRetry(
+    callback: any,
+    intervalList: Array<number> = [],
+    retryBreakFn: any = function () {
+      return false
+    }
+  ): Promise<any> {
     return new Promise<void>((resolve, reject) => {
-      let times = 0;
+      let times = 0
       function tryFn() {
-        times++;
+        times++
         callback()
           .then(resolve)
           .catch((error: any) => {
             if (times > intervalList.length || (retryBreakFn && retryBreakFn(error))) {
-              reject(error);
-              return;
+              reject(error)
+              return
             }
-            setTimeout(tryFn, intervalList[times - 1]);
+            setTimeout(tryFn, intervalList[times - 1])
           })
       }
-      tryFn();
+      tryFn()
     })
   }
-
 
   /**
    * 文件上传进度函数处理
@@ -267,10 +282,10 @@ export default class TUIChatServer extends IComponentServer {
   public handleUploadProgress(progress: number, message: any) {
     this.currentStore.messageList.map((item: any) => {
       if (item.ID === message.ID) {
-        item.progress = progress;
+        item.progress = progress
       }
-      return item;
-    });
+      return item
+    })
   }
 
   /**
@@ -294,24 +309,24 @@ export default class TUIChatServer extends IComponentServer {
   public sendFaceMessage(data: any): Promise<any> {
     return this.handlePromiseCallback(async (resolve: any, reject: any) => {
       try {
-        const options = this.handleMessageOptions(data, 'face');
-        const message = this.TUICore.tim.createFaceMessage(options);
-        this.currentStore.messageList.push(message);
-        const imResponse = await this.TUICore.tim.sendMessage(message);
+        const options = this.handleMessageOptions(data, 'face')
+        const message = this.TUICore.tim.createFaceMessage(options)
+        this.currentStore.messageList.push(message)
+        const imResponse = await this.TUICore.tim.sendMessage(message)
         this.currentStore.messageList = this.currentStore.messageList.map((item: any) => {
           if (item.ID === imResponse.data.message.ID) {
-            return imResponse.data.message;
+            return imResponse.data.message
           }
-          return item;
-        });
-        resolve(imResponse);
+          return item
+        })
+        resolve(imResponse)
       } catch (error) {
-        reject(error);
-        const middleData = this.currentStore.messageList;
-        this.currentStore.messageList = [];
-        this.currentStore.messageList = middleData;
+        reject(error)
+        const middleData = this.currentStore.messageList
+        this.currentStore.messageList = []
+        this.currentStore.messageList = middleData
       }
-    });
+    })
   }
 
   /**
@@ -325,26 +340,26 @@ export default class TUIChatServer extends IComponentServer {
     return this.handlePromiseCallback(async (resolve: any, reject: any) => {
       try {
         const options = this.handleMessageOptions({ file: image }, 'file', (progress: number) => {
-          this.handleUploadProgress(progress, message);
-        });
-        const message = this.TUICore.tim.createImageMessage(options);
-        message.progress = 0.01;
-        this.currentStore.messageList.push(message);
-        const imResponse = await this.TUICore.tim.sendMessage(message);
+          this.handleUploadProgress(progress, message)
+        })
+        const message = this.TUICore.tim.createImageMessage(options)
+        message.progress = 0.01
+        this.currentStore.messageList.push(message)
+        const imResponse = await this.TUICore.tim.sendMessage(message)
         this.currentStore.messageList = this.currentStore.messageList.map((item: any) => {
           if (item.ID === imResponse.data.message.ID) {
-            return imResponse.data.message;
+            return imResponse.data.message
           }
-          return item;
-        });
-        resolve(imResponse);
+          return item
+        })
+        resolve(imResponse)
       } catch (error) {
-        reject(error);
-        const middleData = this.currentStore.messageList;
-        this.currentStore.messageList = [];
-        this.currentStore.messageList = middleData;
+        reject(error)
+        const middleData = this.currentStore.messageList
+        this.currentStore.messageList = []
+        this.currentStore.messageList = middleData
       }
-    });
+    })
   }
 
   /**
@@ -358,27 +373,27 @@ export default class TUIChatServer extends IComponentServer {
     return this.handlePromiseCallback(async (resolve: any, reject: any) => {
       try {
         const options = this.handleMessageOptions({ file: video }, 'file', (progress: number) => {
-          this.handleUploadProgress(progress, message);
-        });
-        const message = this.TUICore.tim.createVideoMessage(options);
-        message.progress = 0.01;
-        this.currentStore.messageList.push(message);
-        const imResponse = await this.TUICore.tim.sendMessage(message);
+          this.handleUploadProgress(progress, message)
+        })
+        const message = this.TUICore.tim.createVideoMessage(options)
+        message.progress = 0.01
+        this.currentStore.messageList.push(message)
+        const imResponse = await this.TUICore.tim.sendMessage(message)
 
         this.currentStore.messageList = this.currentStore.messageList.map((item: any) => {
           if (item.ID === imResponse.data.message.ID) {
-            return imResponse.data.message;
+            return imResponse.data.message
           }
-          return item;
-        });
-        resolve(imResponse);
+          return item
+        })
+        resolve(imResponse)
       } catch (error) {
-        reject(error);
-        const middleData = this.currentStore.messageList;
-        this.currentStore.messageList = [];
-        this.currentStore.messageList = middleData;
+        reject(error)
+        const middleData = this.currentStore.messageList
+        this.currentStore.messageList = []
+        this.currentStore.messageList = middleData
       }
-    });
+    })
   }
 
   /**
@@ -392,26 +407,26 @@ export default class TUIChatServer extends IComponentServer {
     return this.handlePromiseCallback(async (resolve: any, reject: any) => {
       try {
         const options = this.handleMessageOptions({ file }, 'file', (progress: number) => {
-          this.handleUploadProgress(progress, message);
-        });
-        const message = this.TUICore.tim.createFileMessage(options);
-        message.progress = 0.01;
-        this.currentStore.messageList.push(message);
-        const imResponse = await this.TUICore.tim.sendMessage(message);
+          this.handleUploadProgress(progress, message)
+        })
+        const message = this.TUICore.tim.createFileMessage(options)
+        message.progress = 0.01
+        this.currentStore.messageList.push(message)
+        const imResponse = await this.TUICore.tim.sendMessage(message)
         this.currentStore.messageList = this.currentStore.messageList.map((item: any) => {
           if (item.ID === imResponse.data.message.ID) {
-            return imResponse.data.message;
+            return imResponse.data.message
           }
-          return item;
-        });
-        resolve(imResponse);
+          return item
+        })
+        resolve(imResponse)
       } catch (error) {
-        reject(error);
-        const middleData = this.currentStore.messageList;
-        this.currentStore.messageList = [];
-        this.currentStore.messageList = middleData;
+        reject(error)
+        const middleData = this.currentStore.messageList
+        this.currentStore.messageList = []
+        this.currentStore.messageList = middleData
       }
-    });
+    })
   }
 
   /**
@@ -427,25 +442,25 @@ export default class TUIChatServer extends IComponentServer {
   public sendCustomMessage(data: any): Promise<any> {
     return this.handlePromiseCallback(async (resolve: any, reject: any) => {
       try {
-        data.data = JSON.stringify(data.data);
-        const options = this.handleMessageOptions(data, 'custom');
-        const message = this.TUICore.tim.createCustomMessage(options);
-        this.currentStore.messageList.push(message);
-        const imResponse = await this.TUICore.tim.sendMessage(message);
+        data.data = JSON.stringify(data.data)
+        const options = this.handleMessageOptions(data, 'custom')
+        const message = this.TUICore.tim.createCustomMessage(options)
+        this.currentStore.messageList.push(message)
+        const imResponse = await this.TUICore.tim.sendMessage(message)
         this.currentStore.messageList = this.currentStore.messageList.map((item: any) => {
           if (item.ID === imResponse.data.message.ID) {
-            return imResponse.data.message;
+            return imResponse.data.message
           }
-          return item;
-        });
-        resolve(imResponse);
+          return item
+        })
+        resolve(imResponse)
       } catch (error) {
-        reject(error);
-        const middleData = this.currentStore.messageList;
-        this.currentStore.messageList = [];
-        this.currentStore.messageList = middleData;
+        reject(error)
+        const middleData = this.currentStore.messageList
+        this.currentStore.messageList = []
+        this.currentStore.messageList = middleData
       }
-    });
+    })
   }
 
   /**
@@ -461,18 +476,18 @@ export default class TUIChatServer extends IComponentServer {
   public sendLocationMessage(data: any): Promise<any> {
     return this.handlePromiseCallback(async (resolve: any, reject: any) => {
       try {
-        const options = this.handleMessageOptions(data, 'location');
-        const message = this.TUICore.tim.createLocationMessage(options);
-        this.currentStore.messageList.push(message);
-        const imResponse = await this.TUICore.tim.sendMessage(message);
-        resolve(imResponse);
+        const options = this.handleMessageOptions(data, 'location')
+        const message = this.TUICore.tim.createLocationMessage(options)
+        this.currentStore.messageList.push(message)
+        const imResponse = await this.TUICore.tim.sendMessage(message)
+        resolve(imResponse)
       } catch (error) {
-        reject(error);
-        const middleData = this.currentStore.messageList;
-        this.currentStore.messageList = [];
-        this.currentStore.messageList = middleData;
+        reject(error)
+        const middleData = this.currentStore.messageList
+        this.currentStore.messageList = []
+        this.currentStore.messageList = middleData
       }
-    });
+    })
   }
 
   /**
@@ -486,20 +501,20 @@ export default class TUIChatServer extends IComponentServer {
   public forwardMessage(message: any, to: any): Promise<any> {
     return this.handlePromiseCallback(async (resolve: any, reject: any) => {
       try {
-        const options = this.handleMessageOptions(message, 'forward', {}, to);
-        const imMessage = this.TUICore.tim.createForwardMessage(options);
-        const imResponse = await this.TUICore.tim.sendMessage(imMessage);
+        const options = this.handleMessageOptions(message, 'forward', {}, to)
+        const imMessage = this.TUICore.tim.createForwardMessage(options)
+        const imResponse = await this.TUICore.tim.sendMessage(imMessage)
         if (this.store.conversation.conversationID === imResponse.data.message.conversationID) {
-          this.currentStore.messageList.push(imResponse.data.message);
+          this.currentStore.messageList.push(imResponse.data.message)
         }
-        resolve(imResponse);
+        resolve(imResponse)
       } catch (error) {
-        reject(error);
-        const middleData = this.currentStore.messageList;
-        this.currentStore.messageList = [];
-        this.currentStore.messageList = middleData;
+        reject(error)
+        const middleData = this.currentStore.messageList
+        this.currentStore.messageList = []
+        this.currentStore.messageList = middleData
       }
-    });
+    })
   }
 
   /**
@@ -512,12 +527,12 @@ export default class TUIChatServer extends IComponentServer {
   public async sendMessageReadReceipt(messageList: Array<any>) {
     return this.handlePromiseCallback(async (resolve: any, reject: any) => {
       try {
-        const imResponse: any = await this.TUICore.tim.sendMessageReadReceipt(messageList);
-        resolve(imResponse);
+        const imResponse: any = await this.TUICore.tim.sendMessageReadReceipt(messageList)
+        resolve(imResponse)
       } catch (error) {
-        reject(error);
+        reject(error)
       }
-    });
+    })
   }
 
   /**
@@ -530,12 +545,12 @@ export default class TUIChatServer extends IComponentServer {
   public async getMessageReadReceiptList(messageList: Array<any>) {
     return this.handlePromiseCallback(async (resolve: any, reject: any) => {
       try {
-        const imResponse: any = await this.TUICore.tim.getMessageReadReceiptList(messageList);
-        resolve(imResponse);
+        const imResponse: any = await this.TUICore.tim.getMessageReadReceiptList(messageList)
+        resolve(imResponse)
       } catch (error) {
-        reject(error);
+        reject(error)
       }
-    });
+    })
   }
 
   /**
@@ -557,23 +572,26 @@ export default class TUIChatServer extends IComponentServer {
   public async getMessageList(options: any, history?: boolean) {
     return this.handlePromiseCallback(async (resolve: any, reject: any) => {
       try {
-        const imResponse = await this.TUICore.tim.getMessageList(options);
+        const imResponse = await this.TUICore.tim.getMessageList(options)
         if (imResponse.data.messageList.length) {
-          await this.getMessageReadReceiptList(imResponse.data.messageList);
+          await this.getMessageReadReceiptList(imResponse.data.messageList)
         }
         if (!history) {
-          this.currentStore.messageList = imResponse.data.messageList;
+          this.currentStore.messageList = imResponse.data.messageList
         } else {
-          this.currentStore.messageList = [...imResponse.data.messageList, ...this.currentStore.messageList];
+          this.currentStore.messageList = [
+            ...imResponse.data.messageList,
+            ...this.currentStore.messageList
+          ]
         }
-        this.currentStore.nextReqMessageID = imResponse.data.nextReqMessageID;
-        this.currentStore.isCompleted = imResponse.data.isCompleted;
+        this.currentStore.nextReqMessageID = imResponse.data.nextReqMessageID
+        this.currentStore.isCompleted = imResponse.data.isCompleted
 
-        resolve(imResponse);
+        resolve(imResponse)
       } catch (error) {
-        reject(error);
+        reject(error)
       }
-    });
+    })
   }
 
   /**
@@ -586,10 +604,10 @@ export default class TUIChatServer extends IComponentServer {
     const options = {
       conversationID: this.currentStore.conversation.conversationID,
       nextReqMessageID: this.currentStore.nextReqMessageID,
-      count: 15,
-    };
+      count: 15
+    }
     if (!this.currentStore.isCompleted) {
-      this.getMessageList(options, true);
+      this.getMessageList(options, true)
     }
   }
 
@@ -604,34 +622,34 @@ export default class TUIChatServer extends IComponentServer {
   public sendTextMessage(text: any, data: any): Promise<any> {
     return this.handlePromiseCallback(async (resolve: any, reject: any) => {
       try {
-        const options = this.handleMessageOptions({ text }, 'text');
-        let cloudCustomDataObj = {};
+        const options = this.handleMessageOptions({ text }, 'text')
+        let cloudCustomDataObj = {}
         if (options.cloudCustomData) {
           try {
-            cloudCustomDataObj = JSONToObject(options.cloudCustomData);
+            cloudCustomDataObj = JSONToObject(options.cloudCustomData)
           } catch {
-            cloudCustomDataObj = {};
+            cloudCustomDataObj = {}
           }
         }
-        const cloudCustomData = JSON.stringify(data);
-        const secondOptions = Object.assign(options, { cloudCustomData, ...cloudCustomDataObj });
-        const message = this.TUICore.tim.createTextMessage(secondOptions);
-        this.currentStore.messageList.push(message);
-        const imResponse = await this.TUICore.tim.sendMessage(message);
+        const cloudCustomData = JSON.stringify(data)
+        const secondOptions = Object.assign(options, { cloudCustomData, ...cloudCustomDataObj })
+        const message = this.TUICore.tim.createTextMessage(secondOptions)
+        this.currentStore.messageList.push(message)
+        const imResponse = await this.TUICore.tim.sendMessage(message)
         this.currentStore.messageList = this.currentStore.messageList.map((item: any) => {
           if (item.ID === imResponse.data.message.ID) {
-            return imResponse.data.message;
+            return imResponse.data.message
           }
-          return item;
-        });
-        resolve(imResponse);
+          return item
+        })
+        resolve(imResponse)
       } catch (error) {
-        reject(error);
-        const middleData = this.currentStore.messageList;
-        this.currentStore.messageList = [];
-        this.currentStore.messageList = middleData;
+        reject(error)
+        const middleData = this.currentStore.messageList
+        this.currentStore.messageList = []
+        this.currentStore.messageList = middleData
       }
-    });
+    })
   }
 
   /**
@@ -647,18 +665,18 @@ export default class TUIChatServer extends IComponentServer {
   public sendTypingMessage(data: any): Promise<any> {
     return this.handlePromiseCallback(async (resolve: any, reject: any) => {
       try {
-        data.data = JSON.stringify(data.data);
-        const options = this.handleMessageOptions(data, 'custom');
-        const message = this.TUICore.tim.createCustomMessage(options);
-        const imResponse = await this.TUICore.tim.sendMessage(message, { onlineUserOnly: true });
-        resolve(imResponse);
+        data.data = JSON.stringify(data.data)
+        const options = this.handleMessageOptions(data, 'custom')
+        const message = this.TUICore.tim.createCustomMessage(options)
+        const imResponse = await this.TUICore.tim.sendMessage(message, { onlineUserOnly: true })
+        resolve(imResponse)
       } catch (error) {
-        reject(error);
-        const middleData = this.currentStore.messageList;
-        this.currentStore.messageList = [];
-        this.currentStore.messageList = middleData;
+        reject(error)
+        const middleData = this.currentStore.messageList
+        this.currentStore.messageList = []
+        this.currentStore.messageList = middleData
       }
-    });
+    })
   }
 
   /**
@@ -675,24 +693,24 @@ export default class TUIChatServer extends IComponentServer {
   public sendTextAtMessage(data: any) {
     return this.handlePromiseCallback(async (resolve: any, reject: any) => {
       try {
-        const options = this.handleMessageOptions(data, 'text');
-        const message = this.TUICore.tim.createTextAtMessage(options);
-        this.currentStore.messageList.push(message);
-        const imResponse = await this.TUICore.tim.sendMessage(message);
+        const options = this.handleMessageOptions(data, 'text')
+        const message = this.TUICore.tim.createTextAtMessage(options)
+        this.currentStore.messageList.push(message)
+        const imResponse = await this.TUICore.tim.sendMessage(message)
         this.currentStore.messageList = this.currentStore.messageList.map((item: any) => {
           if (item.ID === imResponse.data.message.ID) {
-            return imResponse.data.message;
+            return imResponse.data.message
           }
-          return item;
-        });
-        resolve(imResponse);
+          return item
+        })
+        resolve(imResponse)
       } catch (error) {
-        reject(error);
-        const middleData = this.currentStore.messageList;
-        this.currentStore.messageList = [];
-        this.currentStore.messageList = middleData;
+        reject(error)
+        const middleData = this.currentStore.messageList
+        this.currentStore.messageList = []
+        this.currentStore.messageList = middleData
       }
-    });
+    })
   }
 
   /**
@@ -709,24 +727,24 @@ export default class TUIChatServer extends IComponentServer {
   public sendMergerMessage(data: any): Promise<any> {
     return this.handlePromiseCallback(async (resolve: any, reject: any) => {
       try {
-        const options = this.handleMessageOptions(data, 'merger');
-        const message = this.TUICore.tim.createMergerMessage(options);
-        this.currentStore.messageList.push(message);
-        const imResponse = await this.TUICore.tim.sendMessage(message);
+        const options = this.handleMessageOptions(data, 'merger')
+        const message = this.TUICore.tim.createMergerMessage(options)
+        this.currentStore.messageList.push(message)
+        const imResponse = await this.TUICore.tim.sendMessage(message)
         this.currentStore.messageList = this.currentStore.messageList.map((item: any) => {
           if (item.ID === imResponse.data.message.ID) {
-            return imResponse.data.message;
+            return imResponse.data.message
           }
-          return item;
-        });
-        resolve(imResponse);
+          return item
+        })
+        resolve(imResponse)
       } catch (error) {
-        reject(error);
-        const middleData = this.currentStore.messageList;
-        this.currentStore.messageList = [];
-        this.currentStore.messageList = middleData;
+        reject(error)
+        const middleData = this.currentStore.messageList
+        this.currentStore.messageList = []
+        this.currentStore.messageList = middleData
       }
-    });
+    })
   }
 
   /**
@@ -739,19 +757,19 @@ export default class TUIChatServer extends IComponentServer {
   public revokeMessage(message: any): Promise<any> {
     return this.handlePromiseCallback(async (resolve: any, reject: any) => {
       try {
-        const imResponse = await this.TUICore.tim.revokeMessage(message);
-        const cloudCustomData = JSONToObject(message?.cloudCustomData);
+        const imResponse = await this.TUICore.tim.revokeMessage(message)
+        const cloudCustomData = JSONToObject(message?.cloudCustomData)
         if (cloudCustomData?.messageReply?.messageRootID) {
-          await this.revokeReplyMessage(message);
+          await this.revokeReplyMessage(message)
         }
-        resolve(imResponse);
+        resolve(imResponse)
       } catch (error) {
-        reject(error);
-        const middleData = this.currentStore.messageList;
-        this.currentStore.messageList = [];
-        this.currentStore.messageList = middleData;
+        reject(error)
+        const middleData = this.currentStore.messageList
+        this.currentStore.messageList = []
+        this.currentStore.messageList = middleData
       }
-    });
+    })
   }
 
   /**
@@ -764,14 +782,16 @@ export default class TUIChatServer extends IComponentServer {
   public resendMessage(message: any): Promise<any> {
     return this.handlePromiseCallback(async (resolve: any, reject: any) => {
       try {
-        const imResponse = await this.TUICore.tim.resendMessage(message);
-        this.currentStore.messageList = this.currentStore.messageList.filter((item: any) => item.ID !== message.ID);
-        this.currentStore.messageList.push(imResponse.data.message);
-        resolve(imResponse);
+        const imResponse = await this.TUICore.tim.resendMessage(message)
+        this.currentStore.messageList = this.currentStore.messageList.filter(
+          (item: any) => item.ID !== message.ID
+        )
+        this.currentStore.messageList.push(imResponse.data.message)
+        resolve(imResponse)
       } catch (error) {
-        reject(error);
+        reject(error)
       }
-    });
+    })
   }
 
   /**
@@ -784,42 +804,47 @@ export default class TUIChatServer extends IComponentServer {
   public deleteMessage(messages: any): Promise<any> {
     return this.handlePromiseCallback(async (resolve: any, reject: any) => {
       try {
-        const imResponse = await this.TUICore.tim.deleteMessage(messages);
-        resolve(imResponse);
-        const middleData = this.currentStore.messageList;
-        this.currentStore.messageList = [];
-        this.currentStore.messageList = middleData;
+        const imResponse = await this.TUICore.tim.deleteMessage(messages)
+        resolve(imResponse)
+        const middleData = this.currentStore.messageList
+        this.currentStore.messageList = []
+        this.currentStore.messageList = middleData
       } catch (error) {
-        reject(error);
+        reject(error)
       }
-    });
+    })
   }
 
   /**
    * 变更消息
    * modify message
-   * 
+   *
    * @param {Array.<message>} message 消息实例/message
    * @returns {Promise}
    */
   public modifyMessage(message: any): Promise<any> {
     return this.handlePromiseCallback(async (resolve: any, reject: any) => {
       try {
-        const imResponse = await this.TUICore.tim.modifyMessage(message);
-        resolve(imResponse);
+        const imResponse = await this.TUICore.tim.modifyMessage(message)
+        resolve(imResponse)
       } catch (error) {
         // 修改消息失败
         // Modify message error
-        const code = (error as any)?.code;
-        const data = (error as any)?.data;
+        const code = (error as any)?.code
+        const data = (error as any)?.data
         if (code === 2480) {
-          console.warn('MODIFY_MESSAGE_ERROR', '修改消息发生冲突，data.message 是最新的消息', 'data.message:', data?.message);
+          console.warn(
+            'MODIFY_MESSAGE_ERROR',
+            '修改消息发生冲突，data.message 是最新的消息',
+            'data.message:',
+            data?.message
+          )
         } else if (code === 2481) {
-          console.warn('MODIFY_MESSAGE_ERROR', '不支持修改直播群消息');
+          console.warn('MODIFY_MESSAGE_ERROR', '不支持修改直播群消息')
         } else if (code === 20026) {
-          console.warn('MODIFY_MESSAGE_ERROR', '消息不存在');
+          console.warn('MODIFY_MESSAGE_ERROR', '消息不存在')
         }
-        reject(error);
+        reject(error)
       }
     })
   }
@@ -840,67 +865,86 @@ export default class TUIChatServer extends IComponentServer {
             messageType: message?.type,
             messageTime: message?.time,
             messageSequence: message?.sequence,
-            version: 1,
+            version: 1
           }
           if (!messageRoot) {
-            const cloudCustomData = JSONToObject(message?.cloudCustomData);
-            const messageRootID = cloudCustomData?.messageReply?.messageRootID;
-            messageRoot = await this?.currentStore?.messageList?.find((item: any) => item?.ID === messageRootID) || this.findMessage(messageRootID);
+            const cloudCustomData = JSONToObject(message?.cloudCustomData)
+            const messageRootID = cloudCustomData?.messageReply?.messageRootID
+            messageRoot =
+              (await this?.currentStore?.messageList?.find(
+                (item: any) => item?.ID === messageRootID
+              )) || this.findMessage(messageRootID)
           }
-          const rootCloudCustomData = messageRoot?.cloudCustomData ? JSONToObject(messageRoot?.cloudCustomData) : { messageReplies: {} };
+          const rootCloudCustomData = messageRoot?.cloudCustomData
+            ? JSONToObject(messageRoot?.cloudCustomData)
+            : { messageReplies: {} }
           if (rootCloudCustomData?.messageReplies?.replies) {
-            rootCloudCustomData.messageReplies.replies = [...rootCloudCustomData?.messageReplies?.replies, repliesObject];
+            rootCloudCustomData.messageReplies.replies = [
+              ...rootCloudCustomData?.messageReplies?.replies,
+              repliesObject
+            ]
           } else {
             rootCloudCustomData.messageReplies = { replies: [repliesObject], version: 1 }
           }
-          messageRoot.cloudCustomData = JSON.stringify(rootCloudCustomData);
-          const imResponse = this.modifyMessage(messageRoot);
-          resolve(imResponse);
+          messageRoot.cloudCustomData = JSON.stringify(rootCloudCustomData)
+          const imResponse = this.modifyMessage(messageRoot)
+          resolve(imResponse)
         } catch (error) {
-          reject(error);
+          reject(error)
         }
       })
     }
     const retryBreakFunction = function (error: any) {
-      if (error && error?.code === 2480) return false;
-      return true;
+      if (error && error?.code === 2480) return false
+      return true
     }
-    return this.handlePromiseCallbackRetry(replyFunction, [500, 1000, 3000], retryBreakFunction);
+    return this.handlePromiseCallbackRetry(replyFunction, [500, 1000, 3000], retryBreakFunction)
   }
 
   /**
- * 撤回回复消息
- * revoke reply message
- * @param {Array.<message>} message 消息实例/message
- * @returns {Promise}
- */
+   * 撤回回复消息
+   * revoke reply message
+   * @param {Array.<message>} message 消息实例/message
+   * @returns {Promise}
+   */
   public revokeReplyMessage(message: any, messageRoot?: any): Promise<any> {
     const revokeReplyFunction = () => {
       return this.handlePromiseCallback(async (resolve: any, reject: any) => {
         try {
           if (!messageRoot) {
-            const cloudCustomData = JSONToObject(message?.cloudCustomData);
-            const messageRootID = cloudCustomData?.messageReply?.messageRootID;
-            messageRoot = await this?.currentStore?.messageList?.find((item: any) => item?.ID === messageRootID) || this.findMessage(messageRootID);
+            const cloudCustomData = JSONToObject(message?.cloudCustomData)
+            const messageRootID = cloudCustomData?.messageReply?.messageRootID
+            messageRoot =
+              (await this?.currentStore?.messageList?.find(
+                (item: any) => item?.ID === messageRootID
+              )) || this.findMessage(messageRootID)
           }
-          const rootCloudCustomData = messageRoot?.cloudCustomData ? JSONToObject(messageRoot?.cloudCustomData) : { messageReplies: {} };
+          const rootCloudCustomData = messageRoot?.cloudCustomData
+            ? JSONToObject(messageRoot?.cloudCustomData)
+            : { messageReplies: {} }
           if (rootCloudCustomData?.messageReplies?.replies) {
-            const index = rootCloudCustomData.messageReplies.replies.findIndex((item: any) => item?.messageID === message?.ID);
-            rootCloudCustomData?.messageReplies?.replies?.splice(index, 1);
+            const index = rootCloudCustomData.messageReplies.replies.findIndex(
+              (item: any) => item?.messageID === message?.ID
+            )
+            rootCloudCustomData?.messageReplies?.replies?.splice(index, 1)
           }
-          messageRoot.cloudCustomData = JSON.stringify(rootCloudCustomData);
-          const imResponse = this.modifyMessage(messageRoot);
-          resolve(imResponse);
+          messageRoot.cloudCustomData = JSON.stringify(rootCloudCustomData)
+          const imResponse = this.modifyMessage(messageRoot)
+          resolve(imResponse)
         } catch (error) {
-          reject(error);
+          reject(error)
         }
       })
     }
     const retryBreakFunction = function (error: any) {
-      if (error && error?.code === 2480) return false;
-      return true;
+      if (error && error?.code === 2480) return false
+      return true
     }
-    return this.handlePromiseCallbackRetry(revokeReplyFunction, [500, 1000, 3000], retryBreakFunction);
+    return this.handlePromiseCallbackRetry(
+      revokeReplyFunction,
+      [500, 1000, 3000],
+      retryBreakFunction
+    )
   }
 
   /**
@@ -913,46 +957,54 @@ export default class TUIChatServer extends IComponentServer {
     const emojiReactFunction = () => {
       return this.handlePromiseCallback(async (resolve: any, reject: any) => {
         try {
-          if (!message || !message?.ID || !emojiID) reject();
-          const userID = this.TUICore?.TUIServer?.TUIProfile?.store?.profile?.userID;
-          message = await this?.currentStore?.messageList?.find((item: any) => item?.ID === message?.ID) || this.findMessage(message?.ID);
-          const cloudCustomData = message?.cloudCustomData ? JSONToObject(message?.cloudCustomData) : { messageReact: {} };
+          if (!message || !message?.ID || !emojiID) reject()
+          const userID = this.TUICore?.TUIServer?.TUIProfile?.store?.profile?.userID
+          message =
+            (await this?.currentStore?.messageList?.find(
+              (item: any) => item?.ID === message?.ID
+            )) || this.findMessage(message?.ID)
+          const cloudCustomData = message?.cloudCustomData
+            ? JSONToObject(message?.cloudCustomData)
+            : { messageReact: {} }
           if (cloudCustomData?.messageReact?.reacts) {
             if (cloudCustomData?.messageReact?.reacts[emojiID]) {
-              const index = cloudCustomData?.messageReact?.reacts[emojiID]?.indexOf(userID);
+              const index = cloudCustomData?.messageReact?.reacts[emojiID]?.indexOf(userID)
               if (index === -1) {
-                cloudCustomData?.messageReact?.reacts[emojiID]?.push(userID);
+                cloudCustomData?.messageReact?.reacts[emojiID]?.push(userID)
               } else {
-                cloudCustomData?.messageReact?.reacts[emojiID]?.splice(index, 1);
+                cloudCustomData?.messageReact?.reacts[emojiID]?.splice(index, 1)
                 if (cloudCustomData?.messageReact?.reacts[emojiID]?.length === 0) {
-                  delete cloudCustomData?.messageReact?.reacts[emojiID];
+                  delete cloudCustomData?.messageReact?.reacts[emojiID]
                 }
               }
             } else {
-              cloudCustomData.messageReact.reacts[emojiID] = [userID];
+              cloudCustomData.messageReact.reacts[emojiID] = [userID]
             }
           } else {
             cloudCustomData.messageReact = {
               reacts: {},
               version: 1
             }
-            cloudCustomData.messageReact.reacts[emojiID] = [userID];
+            cloudCustomData.messageReact.reacts[emojiID] = [userID]
           }
-          message.cloudCustomData = JSON.stringify(cloudCustomData);
-          const imResponse = this.modifyMessage(message);
-          resolve(imResponse);
+          message.cloudCustomData = JSON.stringify(cloudCustomData)
+          const imResponse = this.modifyMessage(message)
+          resolve(imResponse)
         } catch (error) {
-          reject(error);
+          reject(error)
         }
       })
     }
     const retryBreakFunction = function (error: any) {
-      if (error && error?.code === 2480) return false;
-      return true;
+      if (error && error?.code === 2480) return false
+      return true
     }
-    return this.handlePromiseCallbackRetry(emojiReactFunction, [500, 1000, 3000], retryBreakFunction);
+    return this.handlePromiseCallbackRetry(
+      emojiReactFunction,
+      [500, 1000, 3000],
+      retryBreakFunction
+    )
   }
-
 
   /**
    * 查询消息
@@ -963,10 +1015,10 @@ export default class TUIChatServer extends IComponentServer {
   public findMessage(messageID: string): Promise<any> {
     return this.handlePromiseCallback(async (resolve: any, reject: any) => {
       try {
-        const imResponse = await this.TUICore.tim.findMessage(messageID);
-        resolve(imResponse);
+        const imResponse = await this.TUICore.tim.findMessage(messageID)
+        resolve(imResponse)
       } catch (error) {
-        reject(error);
+        reject(error)
       }
     })
   }
@@ -983,13 +1035,13 @@ export default class TUIChatServer extends IComponentServer {
   public getGroupProfile(options: any): Promise<any> {
     return this.handlePromiseCallback(async (resolve: any, reject: any) => {
       try {
-        const imResponse = await this.TUICore.tim.getGroupProfile(options);
-        this.currentStore.conversation.groupProfile = imResponse.data.group;
-        resolve(imResponse);
+        const imResponse = await this.TUICore.tim.getGroupProfile(options)
+        this.currentStore.conversation.groupProfile = imResponse.data.group
+        resolve(imResponse)
       } catch (error) {
-        reject(error);
+        reject(error)
       }
-    });
+    })
   }
 
   /**
@@ -1005,12 +1057,12 @@ export default class TUIChatServer extends IComponentServer {
   public getGroupMemberProfile(options: any): Promise<any> {
     return this.handlePromiseCallback(async (resolve: any, reject: any) => {
       try {
-        const imResponse = await this.TUICore.tim.getGroupMemberProfile(options);
-        resolve(imResponse);
+        const imResponse = await this.TUICore.tim.getGroupMemberProfile(options)
+        resolve(imResponse)
       } catch (error) {
-        reject(error);
+        reject(error)
       }
-    });
+    })
   }
 
   /**
@@ -1028,12 +1080,12 @@ export default class TUIChatServer extends IComponentServer {
   public handleGroupApplication(options: any): Promise<any> {
     return this.handlePromiseCallback(async (resolve: any, reject: any) => {
       try {
-        const imResponse = await this.TUICore.tim.handleGroupApplication(options);
-        resolve(imResponse);
+        const imResponse = await this.TUICore.tim.handleGroupApplication(options)
+        resolve(imResponse)
       } catch (error) {
-        reject(error);
+        reject(error)
       }
-    });
+    })
   }
 
   /**
@@ -1046,12 +1098,12 @@ export default class TUIChatServer extends IComponentServer {
   public async getUserProfile(userIDList: Array<string>) {
     return this.handlePromiseCallback(async (resolve: any, reject: any) => {
       try {
-        const imResponse = await this.TUICore.tim.getUserProfile({ userIDList });
-        resolve(imResponse);
+        const imResponse = await this.TUICore.tim.getUserProfile({ userIDList })
+        resolve(imResponse)
       } catch (error) {
-        reject(error);
+        reject(error)
       }
-    });
+    })
   }
 
   /**
@@ -1064,12 +1116,12 @@ export default class TUIChatServer extends IComponentServer {
   public async getFriendList(): Promise<void> {
     return this.handlePromiseCallback(async (resolve: any, reject: any) => {
       try {
-        const imResponse = await this.TUICore.tim.getFriendList();
-        resolve(imResponse);
+        const imResponse = await this.TUICore.tim.getFriendList()
+        resolve(imResponse)
       } catch (error) {
-        reject(error);
+        reject(error)
       }
-    });
+    })
   }
 
   /**
@@ -1082,13 +1134,13 @@ export default class TUIChatServer extends IComponentServer {
   public async checkFriend(userID: string, type: string): Promise<void> {
     return this.handlePromiseCallback(async (resolve: any, reject: any) => {
       try {
-        const imResponse = await this.TUICore.tim.checkFriend({ userIDList: [userID], type });
-        const isFriendShip = imResponse?.data?.successUserIDList[0]?.relation;
-        resolve(isFriendShip);
+        const imResponse = await this.TUICore.tim.checkFriend({ userIDList: [userID], type })
+        const isFriendShip = imResponse?.data?.successUserIDList[0]?.relation
+        resolve(isFriendShip)
       } catch (error) {
-        reject(error);
+        reject(error)
       }
-    });
+    })
   }
 
   /**
@@ -1107,13 +1159,13 @@ export default class TUIChatServer extends IComponentServer {
           message,
           filter: 0,
           cursor,
-          count,
-        });
-        resolve(imResponse);
+          count
+        })
+        resolve(imResponse)
       } catch (error) {
-        reject(error);
+        reject(error)
       }
-    });
+    })
   }
 
   /**
@@ -1132,25 +1184,25 @@ export default class TUIChatServer extends IComponentServer {
           message,
           filter: 1,
           cursor,
-          count,
-        });
-        resolve(imResponse);
+          count
+        })
+        resolve(imResponse)
       } catch (error) {
-        reject(error);
+        reject(error)
       }
-    });
+    })
   }
 
   /**
- * 自己发送消息上屏显示
- *
- * @param {message} message 消息实例/message
- */
+   * 自己发送消息上屏显示
+   *
+   * @param {message} message 消息实例/message
+   */
   public async handleMessageSentByMeToView(message: any) {
     if (message?.conversationID === this?.store?.conversation?.conversationID) {
-      this.currentStore.messageList.push(message);
+      this.currentStore.messageList.push(message)
     }
-    return;
+    return
   }
 
   /**
@@ -1170,6 +1222,6 @@ export default class TUIChatServer extends IComponentServer {
    * @returns {Object} 数据/data
    */
   public bind(params: any) {
-    return (this.currentStore = params);
+    return (this.currentStore = params)
   }
 }
