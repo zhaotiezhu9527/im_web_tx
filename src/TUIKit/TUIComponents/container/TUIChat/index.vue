@@ -115,7 +115,7 @@
               parentID="func"
               @send="handleSend"
             ></component>
-            <span class="upload-btn icon iconfont icon-jietu" title="截图" @click="btnClick"></span>
+            <!-- <span class="upload-btn icon iconfont icon-jietu" title="截图" @click="btnClick"></span> -->
           </main>
         </div>
         <MessageInput
